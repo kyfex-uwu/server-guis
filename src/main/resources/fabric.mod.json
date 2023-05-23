@@ -4,7 +4,7 @@
   "version": "${version}",
 
   "name": "Server GUIs",
-  "description": "hehe",
+  "description": "A utility server-side Fabric 1.19.4 mod that lets you easily create server-side GUIs",
   "authors": [
     "kyfex_uwu"
   ],

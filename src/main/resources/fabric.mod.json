@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "server-guis",
+  "version": "${version}",
+
+  "name": "Server GUIs",
+  "description": "hehe",
+  "authors": [
+    "kyfex_uwu"
+  ],
+  "contact": {
+    "homepage": "not yet",
+    "sources": "not yet"
+  },
+
+  "license": "CC0-1.0",
+  "icon": "assets/server-guis/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.kyfexuwu.server_guis.ServerGUIs"
+    ]
+  },
+  "mixins": [
+    "server-guis.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.14.19",
+    "fabric-api": "*",
+    "minecraft": "~1.19.4",
+    "java": ">=17"
+  },
+  "suggests": {
+    "another-mod": "*"
+  }
+}

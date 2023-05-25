@@ -1,6 +1,7 @@
 package com.kyfexuwu.server_guis;
 
 import net.minecraft.block.Blocks;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
@@ -8,7 +9,10 @@ import net.minecraft.text.Text;
 import java.util.Arrays;
 
 public class InvGUIItem {
-    public final ItemStack display;
+    private final ItemStack display;
+    public ItemStack display(PlayerEntity player){
+        return this.display;
+    }
     public final ClickConsumer onClick;
     public InvGUIItem(ItemConvertible display, Text name, ClickConsumer onClick){
         this.display=display.asItem().getDefaultStack().setCustomName(name);
@@ -22,8 +26,8 @@ public class InvGUIItem {
 
     public record InvGuiEntry(char index, InvGUIItem item){}
     public static InvGUIItem[] decode(String map, InvGuiEntry... translations){
-        var toReturn = new InvGUIItem[27];
-        for(int i=0;i<27;i++){
+        var toReturn = new InvGUIItem[map.length()];
+        for(int i=0;i<toReturn.length;i++){
             int finalI = i;
             var toSet=Arrays.stream(translations).filter(entry->entry.index==map.charAt(finalI))
                     .findFirst();

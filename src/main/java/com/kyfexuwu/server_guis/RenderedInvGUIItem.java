@@ -13,6 +13,9 @@ public class RenderedInvGUIItem extends InvGUIItem{
     public ItemStack display(PlayerEntity player){
         return this.display.apply(player);
     }
+    public RenderedInvGUIItem(Function<PlayerEntity, ItemStack> display) {
+        this(display, ClickConsumer.NOTHING);
+    }
     public RenderedInvGUIItem(Function<PlayerEntity, ItemStack> display, ClickConsumer onClick) {
         super(Blocks.AIR, Text.empty(), onClick);
         this.display=display;

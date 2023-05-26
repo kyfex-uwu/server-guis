@@ -45,16 +45,18 @@ public class ServerGuiHandler extends ScreenHandler {
     public final InvGUI gui;
     public final Inventory inventory;
     private final PlayerEntity player;
+
     public ServerGuiHandler(int syncId, PlayerInventory playerInventory, ScreenHandlerType<?> type, InvGUI gui) {
         super(type, syncId);
 
-        int invSize=invSlotAmt.get(type);
+        int invSize = invSlotAmt.get(type);
+        this.consumers = new ClickConsumer[invSize];
 
-        this.inventory = new SimpleInventory(invSize+36);
+        this.inventory = new SimpleInventory(invSize +36);
         this.inventory.onOpen(playerInventory.player);
 
         this.player = playerInventory.player;
-        for(int i=0;i<invSize;i++){
+        for(int i = 0; i< invSize; i++){
             this.addSlot(new Slot(this.inventory, i, 0, 0));
             putInvGUIItem(i, gui.items[i]);
         }
@@ -71,7 +73,7 @@ public class ServerGuiHandler extends ScreenHandler {
         this.gui=gui;
     }
 
-    private final ClickConsumer[] consumers = new ClickConsumer[27];
+    private final ClickConsumer[] consumers;
     public void putInvGUIItem(int slot, InvGUIItem item){
         this.setStackInSlot(slot, 0, item.display(this.player));
         this.consumers[slot]=item.onClick;

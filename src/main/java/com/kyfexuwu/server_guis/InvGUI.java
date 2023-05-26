@@ -4,7 +4,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.screen.*;
 import net.minecraft.text.Text;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 
@@ -33,11 +32,15 @@ public class InvGUI {
         public InvGUI build(PlayerEntity player){
             return this.builder.build(player,this);
         }
+        public void buildAndOpen(PlayerEntity player){
+            this.build(player).open(player);
+        }
     }
     //todo: change to identifiers
     private static final HashMap<String, Template> guis = new HashMap<>();
     public static void register(String name, Template gui){ guis.put(name, gui); }
     public static Template get(String name){ return guis.get(name); }
+    public static void getBuildAndOpen(String name, PlayerEntity player){ guis.get(name).buildAndOpen(player); }
     private ServerGuiHandler handler;
     private final ScreenHandlerType<?> type;
     public final Text title;

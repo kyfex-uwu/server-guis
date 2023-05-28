@@ -5,42 +5,32 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.screen.*;
 import net.minecraft.text.Text;
 
-import java.util.HashMap;
-
 public class InvGUI {
     @FunctionalInterface
-    public interface Builder{
-        InvGUI build(PlayerEntity player, Template template);
+    public interface Builder<T>{
+        InvGUI build(PlayerEntity player, Template<T> template, T argument);
     }
-    public static class Template {
+    public static class Template<T> {
         public final ScreenHandlerType<?> type;
         public final Text title;
         public final InvGUIItem[] items;
-        private final Builder builder;
+        private final Builder<T> builder;
 
-        private static final Builder defaultBuilder = (player, template) ->
+        public static final Builder<Void> defaultBuilder = (player, template, arg) ->
                 new InvGUI(template.type, template.title, template.items);
-        public Template(ScreenHandlerType<?> type, Text title, InvGUIItem[] items) {
-            this(type,title,items,defaultBuilder);
-        }
-        public Template(ScreenHandlerType<?> type, Text title, InvGUIItem[] items, Builder builder) {
+        public Template(ScreenHandlerType<?> type, Text title, InvGUIItem[] items, Builder<T> builder) {
             this.type = type;
             this.title = title;
             this.items = items;
             this.builder = builder;
         }
-        public InvGUI build(PlayerEntity player){
-            return this.builder.build(player,this);
+        public InvGUI build(PlayerEntity player, T arg){
+            return this.builder.build(player,this, arg);
         }
-        public void buildAndOpen(PlayerEntity player){
-            this.build(player).open(player);
+        public void buildAndOpen(PlayerEntity player, T arg){
+            this.build(player, arg).open(player);
         }
     }
-    //todo: change to identifiers
-    private static final HashMap<String, Template> guis = new HashMap<>();
-    public static void register(String name, Template gui){ guis.put(name, gui); }
-    public static Template get(String name){ return guis.get(name); }
-    public static void getBuildAndOpen(String name, PlayerEntity player){ guis.get(name).buildAndOpen(player); }
     private ServerGuiHandler handler;
     private final ScreenHandlerType<?> type;
     public final Text title;

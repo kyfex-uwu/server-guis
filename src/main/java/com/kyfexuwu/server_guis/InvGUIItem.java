@@ -1,47 +1,52 @@
 package com.kyfexuwu.server_guis;
 
-import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
+import net.minecraft.item.Items;
 
 import java.util.Arrays;
 
-public class InvGUIItem {
-    private final ItemStack display;
-    public ItemStack display(PlayerEntity player){
-        return this.display;
-    }
-    public final ClickConsumer onClick;
+public interface InvGUIItem{
+    ItemStack getItem(PlayerEntity player, Object argument);
+    ClickConsumer onClick();
 
-    public InvGUIItem(ItemConvertible display, Text name, int count, ClickConsumer onClick){
-        var d = display.asItem().getDefaultStack().setCustomName(name);
-        d.setCount(count);
-        this.display=d;
-        this.onClick=onClick;
-    }
-    public InvGUIItem(ItemConvertible display, Text name, ClickConsumer onClick){
-        this(display, name, 1, onClick);
-    }
-    public InvGUIItem(ItemConvertible display, Text name, int count){
-        this(display, name, count, ClickConsumer.NOTHING);
-    }
-    public InvGUIItem(ItemConvertible display, Text name){
-        this(display, name, 1, ClickConsumer.NOTHING);
-    }
+    InvGUIItem IMMOVABLE = new InvGUIItem() {
+        @Override
+        public ItemStack getItem(PlayerEntity player, Object argument) {
+            return Items.BLACK_STAINED_GLASS_PANE.getDefaultStack();
+        }
 
-    public static final InvGUIItem IMMOVABLE = new InvGUIItem(Blocks.BLACK_STAINED_GLASS_PANE,Text.empty(),
-            ClickConsumer.NOTHING);
-    public static final InvGUIItem EMPTY = new InvGUIItem(Blocks.AIR,Text.empty(),
-            ClickConsumer.NOTHING);
+        @Override
+        public ClickConsumer onClick() {
+            return ClickConsumer.NOTHING;
+        }
+    };
+    InvGUIItem EMPTY = new InvGUIItem() {
+        @Override
+        public ItemStack getItem(PlayerEntity player, Object argument) {
+            return Items.AIR.getDefaultStack();
+        }
 
-    public record InvGUIEntry(char index, InvGUIItem item){}
-    public static InvGUIItem[] decode(String map, InvGUIEntry... translations){
+        @Override
+        public ClickConsumer onClick() {
+            return ClickConsumer.NOTHING;
+        }
+    };
+
+    class InvGUIEntry{
+        public final char key;
+        public final InvGUIItem item;
+
+        public InvGUIEntry(char key, InvGUIItem item){
+            this.key=key;
+            this.item=item;
+        }
+    }
+    static InvGUIItem[] decode(String map, InvGUIItem.InvGUIEntry... translations){
         var toReturn = new InvGUIItem[map.length()];
         for(int i=0;i<toReturn.length;i++){
             int finalI = i;
-            var toSet=Arrays.stream(translations).filter(entry->entry.index==map.charAt(finalI))
+            var toSet=Arrays.stream(translations).filter(entry->entry.key==map.charAt(finalI))
                     .findFirst();
             if(toSet.isPresent())
                 toReturn[i] = toSet.get().item;

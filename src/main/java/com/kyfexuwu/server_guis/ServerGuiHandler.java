@@ -42,23 +42,26 @@ public class ServerGuiHandler extends ScreenHandler {
         invSlotAmt.put(ScreenHandlerType.STONECUTTER,2);
     }
 
-    public final InvGUI gui;
+    public final InvGUI<?> gui;
     public final Inventory inventory;
     private final PlayerEntity player;
+    private final Object argument;
 
-    public ServerGuiHandler(int syncId, PlayerInventory playerInventory, ScreenHandlerType<?> type, InvGUI gui) {
+    public ServerGuiHandler(int syncId, PlayerInventory playerInventory, ScreenHandlerType<?> type, InvGUI<?> gui, Object argument) {
         super(type, syncId);
 
         int invSize = invSlotAmt.get(type);
         this.consumers = new ClickConsumer[invSize];
 
+        this.argument = argument;
+
         this.inventory = new SimpleInventory(invSize +36);
         this.inventory.onOpen(playerInventory.player);
 
         this.player = playerInventory.player;
-        for(int i = 0; i< invSize; i++){
+        for(int i = 0; i < invSize; i++){
             this.addSlot(new Slot(this.inventory, i, 0, 0));
-            putInvGUIItem(i, gui.items[i]);
+            this.putInvGUIItem(i, gui.items[i]);
         }
 
         for(int y = 0; y < 3; y++) {
@@ -73,10 +76,10 @@ public class ServerGuiHandler extends ScreenHandler {
         this.gui=gui;
     }
 
-    private final ClickConsumer[] consumers;
+    private final ClickConsumer<?>[] consumers;
     public void putInvGUIItem(int slot, InvGUIItem item){
-        this.setStackInSlot(slot, 0, item.display(this.player));
-        this.consumers[slot]=item.onClick;
+        this.setStackInSlot(slot, 0, item.getItem(this.player, this.argument));
+        this.consumers[slot]=item.onClick();
     }
 
     @Override
@@ -88,11 +91,19 @@ public class ServerGuiHandler extends ScreenHandler {
     @Override
     public void onSlotClick(int slotIndex, int button, SlotActionType actionType, PlayerEntity player) {
         if(slotIndex>=0&&slotIndex<this.inventory.size()-36){
-            if(consumers[slotIndex]!=null){
-                consumers[slotIndex].consume(slotIndex, button, actionType, player, this.gui);
+            if(this.consumers[slotIndex]!=null){
+                try {
+                    this.consumers[slotIndex].consume(slotIndex, button, actionType, player, this.gui, appeaseCompiler(this.argument));
+                }catch(ClassCastException e){
+                    this.consumers[slotIndex].consume(slotIndex, button, actionType, player, this.gui, null);
+                }
             }
             return;
         }
         super.onSlotClick(slotIndex, button, actionType, player);
+    }
+
+    private static <T> T appeaseCompiler(Object toConvert){
+        return (T) toConvert;
     }
 }

@@ -1,23 +1,29 @@
 package com.kyfexuwu.server_guis;
 
-import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
 
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
-public class RenderedInvGUIItem extends InvGUIItem{
-    private final Function<PlayerEntity, ItemStack> display;
-    @Override
-    public ItemStack display(PlayerEntity player){
-        return this.display.apply(player);
-    }
-    public RenderedInvGUIItem(Function<PlayerEntity, ItemStack> display) {
-        this(display, ClickConsumer.NOTHING);
-    }
-    public RenderedInvGUIItem(Function<PlayerEntity, ItemStack> display, ClickConsumer onClick) {
-        super(Blocks.AIR, Text.empty(), onClick);
+public class RenderedInvGUIItem<T> implements InvGUIItem {
+    private final BiFunction<PlayerEntity, T, ItemStack> display;
+    private final ClickConsumer<T> clickConsumer;
+    public RenderedInvGUIItem(BiFunction<PlayerEntity, T, ItemStack> display, ClickConsumer<T> clickConsumer){
         this.display=display;
+        this.clickConsumer=clickConsumer;
+    }
+
+    @Override
+    public ItemStack getItem(PlayerEntity player, Object parameter) {
+        try {
+            return this.display.apply(player, (T) parameter);
+        }catch(Exception e){
+            return this.display.apply(player, null);
+        }
+    }
+
+    @Override
+    public ClickConsumer onClick() {
+        return this.clickConsumer;
     }
 }

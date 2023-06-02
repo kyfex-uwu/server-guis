@@ -9,6 +9,7 @@ public class ServerGUIs implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
+		//Testing.test();
 		LOGGER.info("Server GUIs loaded!");
 	}
 }

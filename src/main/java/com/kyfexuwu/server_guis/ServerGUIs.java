@@ -21,8 +21,8 @@ public class ServerGUIs implements ModInitializer {
 		LOGGER.info("Server GUIs loaded!");
 	}
 
-	public static ClickConsumer<?> nothingClick(){ return (_1,_2,_3,_4,_5,_6)->{}; }
-	public static CloseConsumer<?> nothingClose(){ return (_1,_2,_3)->{}; }
+	public static <T> ClickConsumer<T> nothingClick(){ return (_1,_2,_3,_4,_5,_6)->{}; }
+	public static <T> CloseConsumer<T> nothingClose(){ return (_1,_2,_3)->{}; }
 
 	public static InvGUIItem IMMOVABLE = new InvGUIItem() {
 		@Override

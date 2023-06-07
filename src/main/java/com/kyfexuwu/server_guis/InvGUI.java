@@ -38,7 +38,7 @@ public class InvGUI<T> {
     }
     private ServerGuiHandler handler;
     public ServerGuiHandler getHandler(){ return this.handler; }
-    private final ScreenHandlerType<?> type;
+    public final ScreenHandlerType<?> type;
     public final Text title;
     public final InvGUIItem[] items;
     public final CloseConsumer<T> onClose;

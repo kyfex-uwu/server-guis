@@ -1,43 +1,24 @@
 package com.kyfexuwu.server_guis;
 
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
+import net.minecraft.server.network.ServerPlayerEntity;
 
 import java.util.Arrays;
+import java.util.function.Supplier;
 
 public interface InvGUIItem{
-    ItemStack getItem(PlayerEntity player, Object argument);
-    ClickConsumer onClick();
-
-    InvGUIItem IMMOVABLE = new InvGUIItem() {
-        @Override
-        public ItemStack getItem(PlayerEntity player, Object argument) {
-            return Items.BLACK_STAINED_GLASS_PANE.getDefaultStack();
-        }
-
-        @Override
-        public ClickConsumer onClick() {
-            return ClickConsumer.NOTHING;
-        }
-    };
-    InvGUIItem EMPTY = new InvGUIItem() {
-        @Override
-        public ItemStack getItem(PlayerEntity player, Object argument) {
-            return Items.AIR.getDefaultStack();
-        }
-
-        @Override
-        public ClickConsumer onClick() {
-            return ClickConsumer.NOTHING;
-        }
-    };
+    ItemStack getItem(ServerPlayerEntity player, Object argument);
+    ClickConsumer<?> onClick();
 
     class InvGUIEntry{
         public final char key;
-        public final InvGUIItem item;
+        public final Supplier<InvGUIItem> item;
 
         public InvGUIEntry(char key, InvGUIItem item){
+            this.key=key;
+            this.item=()->item;
+        }
+        public InvGUIEntry(char key, Supplier<InvGUIItem> item){
             this.key=key;
             this.item=item;
         }
@@ -49,9 +30,9 @@ public interface InvGUIItem{
             var toSet=Arrays.stream(translations).filter(entry->entry.key==map.charAt(finalI))
                     .findFirst();
             if(toSet.isPresent())
-                toReturn[i] = toSet.get().item;
+                toReturn[i] = toSet.get().item.get();
             else
-                toReturn[i] = InvGUIItem.EMPTY;
+                toReturn[i] = ServerGUIs.EMPTY;
         }
 
         return toReturn;

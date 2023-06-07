@@ -3,45 +3,52 @@ package com.kyfexuwu.server_guis;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.screen.*;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 
 public class InvGUI<T> {
     @FunctionalInterface
     public interface Builder<T>{
-        InvGUI<T> build(PlayerEntity player, Template<T> template, T argument);
+        InvGUI<T> build(ServerPlayerEntity player, Template<T> template, T argument);
+    }
+    public static <T> Builder<T> defaultBuilder() {
+        return (player, template, arg) ->
+                new InvGUI<>(template.type, template.title, template.items, template.onClose);
     }
     public static class Template<T> {
         public final ScreenHandlerType<?> type;
         public final Text title;
         public final InvGUIItem[] items;
         private final Builder<T> builder;
+        public final CloseConsumer<T> onClose;
 
-        public static final Builder<Void> defaultBuilder = (player, template, arg) ->
-                new InvGUI<>(template.type, template.title, template.items);
-        public Template(ScreenHandlerType<?> type, Text title, InvGUIItem[] items, Builder<T> builder) {
+        public Template(ScreenHandlerType<?> type, Text title, InvGUIItem[] items, CloseConsumer<T> onClose, Builder<T> builder) {
             this.type = type;
             this.title = title;
             this.items = items;
             this.builder = builder;
+            this.onClose = onClose;
         }
-        public InvGUI<T> build(PlayerEntity player, T arg){
+        public InvGUI<T> build(ServerPlayerEntity player, T arg){
             return this.builder.build(player,this, arg);
         }
-        public void buildAndOpen(PlayerEntity player, T arg){
+        public void buildAndOpen(ServerPlayerEntity player, T arg){
             this.build(player, arg).open(player, arg);
         }
     }
     private ServerGuiHandler handler;
+    public ServerGuiHandler getHandler(){ return this.handler; }
     private final ScreenHandlerType<?> type;
     public final Text title;
     public final InvGUIItem[] items;
-    public InvGUI(ScreenHandlerType<?> type, Text title, InvGUIItem[] items) {
+    public final CloseConsumer<T> onClose;
+    public InvGUI(ScreenHandlerType<?> type, Text title, InvGUIItem[] items, CloseConsumer<T> onClose) {
         this.type = type;
         this.title = title;
         this.items = items;
+        this.onClose = onClose;
     }
-
-    public void open(PlayerEntity player, T argument){
+    public void open(ServerPlayerEntity player, T argument){
         var thisObj = this;
         player.openHandledScreen(new NamedScreenHandlerFactory() {
             @Override

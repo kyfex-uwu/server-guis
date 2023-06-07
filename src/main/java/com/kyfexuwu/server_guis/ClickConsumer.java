@@ -1,10 +1,9 @@
 package com.kyfexuwu.server_guis;
 
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.server.network.ServerPlayerEntity;
 
 @FunctionalInterface
 public interface ClickConsumer<T> {
-    ClickConsumer<?> NOTHING = (_1,_2,_3,_4,_5,_6)->{};
-    void consume(int slotIndex, int button, SlotActionType actionType, PlayerEntity player, InvGUI<?> thisInv, T argument);
+    void consume(int slotIndex, int button, SlotActionType actionType, ServerPlayerEntity player, InvGUI<?> thisInv, T argument);
 }

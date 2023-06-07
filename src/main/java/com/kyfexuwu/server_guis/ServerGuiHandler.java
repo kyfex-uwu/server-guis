@@ -9,6 +9,7 @@ import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.server.network.ServerPlayerEntity;
 
 import java.util.HashMap;
 
@@ -44,7 +45,7 @@ public class ServerGuiHandler extends ScreenHandler {
 
     public final InvGUI<?> gui;
     public final Inventory inventory;
-    private final PlayerEntity player;
+    private final ServerPlayerEntity player;
     private final Object argument;
 
     public ServerGuiHandler(int syncId, PlayerInventory playerInventory, ScreenHandlerType<?> type, InvGUI<?> gui, Object argument) {
@@ -58,7 +59,7 @@ public class ServerGuiHandler extends ScreenHandler {
         this.inventory = new SimpleInventory(invSize +36);
         this.inventory.onOpen(playerInventory.player);
 
-        this.player = playerInventory.player;
+        this.player = (ServerPlayerEntity) playerInventory.player;
         for(int i = 0; i < invSize; i++){
             this.addSlot(new Slot(this.inventory, i, 0, 0));
             this.putInvGUIItem(i, gui.items[i]);
@@ -76,11 +77,6 @@ public class ServerGuiHandler extends ScreenHandler {
         this.gui=gui;
     }
 
-    private final ClickConsumer<?>[] consumers;
-    public void putInvGUIItem(int slot, InvGUIItem item){
-        this.setStackInSlot(slot, 0, item.getItem(this.player, this.argument));
-        this.consumers[slot]=item.onClick();
-    }
 
     @Override
     public ItemStack quickMove(PlayerEntity player1, int slot) { return ItemStack.EMPTY; }
@@ -93,14 +89,41 @@ public class ServerGuiHandler extends ScreenHandler {
         if(slotIndex>=0&&slotIndex<this.inventory.size()-36){
             if(this.consumers[slotIndex]!=null){
                 try {
-                    this.consumers[slotIndex].consume(slotIndex, button, actionType, player, this.gui, appeaseCompiler(this.argument));
+                    this.consumers[slotIndex].consume(slotIndex, button, actionType, (ServerPlayerEntity) player, this.gui, appeaseCompiler(this.argument));
                 }catch(ClassCastException e){
-                    this.consumers[slotIndex].consume(slotIndex, button, actionType, player, this.gui, null);
+                    this.consumers[slotIndex].consume(slotIndex, button, actionType, (ServerPlayerEntity) player, this.gui, null);
                 }
             }
             return;
         }
         super.onSlotClick(slotIndex, button, actionType, player);
+    }
+
+    @Override
+    public void onClosed(PlayerEntity player) {
+        super.onClosed(player);
+        try {
+            this.gui.onClose.consume((ServerPlayerEntity) player, this.gui, appeaseCompiler(this.argument));
+        }catch(ClassCastException e){
+            this.gui.onClose.consume((ServerPlayerEntity) player, this.gui, null);
+        }
+    }
+    private final ClickConsumer<?>[] consumers;
+    public void putInvGUIItem(int slot, InvGUIItem item){
+        this.setStackInSlot(slot, 0, item.getItem(this.player, this.argument));
+        this.consumers[slot]=item.onClick();
+    }
+
+    public void refresh(){
+        for(int i = 0; i < this.inventory.size()-36; i++){
+            var item1 = this.gui.items[i].getItem(this.player, this.argument);
+            var item2 = this.inventory.getStack(i);
+
+            if(item1.getCount()!=item2.getCount() ||
+                (!(item1.isEmpty()&&item2.isEmpty()) && !ItemStack.areItemsEqual(item1,item2))) {
+                this.setStackInSlot(i, 0, item1);
+            }
+        }
     }
 
     private static <T> T appeaseCompiler(Object toConvert){

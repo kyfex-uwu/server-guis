@@ -1,8 +1,8 @@
 package com.kyfexuwu.server_guis;
 
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 
 public class StaticInvGUIItem implements InvGUIItem{
@@ -17,7 +17,7 @@ public class StaticInvGUIItem implements InvGUIItem{
     }
 
     @Override
-    public ItemStack getItem(PlayerEntity player, Object argument) {
+    public ItemStack getItem(ServerPlayerEntity player, Object argument) {
         return this.display;
     }
 

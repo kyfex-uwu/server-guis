@@ -9,6 +9,7 @@ import net.minecraft.nbt.NbtIntArray;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,26 +26,13 @@ public class ServerGUIs implements ModInitializer {
 	public static <T> CloseConsumer<T> nothingClose(){ return (_1,_2,_3)->{}; }
 
 	public static InvGUIItem IMMOVABLE = new InvGUIItem() {
-		@Override
-		public ItemStack getItem(ServerPlayerEntity player, Object argument) {
-			return Items.BLACK_STAINED_GLASS_PANE.getDefaultStack();
-		}
+		private static ItemStack item = Items.BLACK_STAINED_GLASS_PANE.getDefaultStack().setCustomName(Text.of("§f"));
+		private static ClickConsumer<?> onClick = ServerGUIs.nothingClick();
 
 		@Override
-		public ClickConsumer<?> onClick() {
-			return ServerGUIs.nothingClick();
-		}
-	};
-	public static InvGUIItem EMPTY = new InvGUIItem() {
+		public ItemStack getItem(ServerPlayerEntity player, Object argument) { return item; }
 		@Override
-		public ItemStack getItem(ServerPlayerEntity player, Object argument) {
-			return Items.AIR.getDefaultStack();
-		}
-
-		@Override
-		public ClickConsumer<?> onClick() {
-			return ServerGUIs.nothingClick();
-		}
+		public ClickConsumer<?> onClick() { return onClick; }
 	};
 
 	public static ItemStack getPlayerHead(int i1, int i2, int i3, int i4, String textureString){

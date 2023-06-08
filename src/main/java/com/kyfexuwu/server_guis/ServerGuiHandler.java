@@ -119,8 +119,7 @@ public class ServerGuiHandler extends ScreenHandler {
             var item1 = this.gui.items[i].getItem(this.player, this.argument);
             var item2 = this.inventory.getStack(i);
 
-            if(item1.getCount()!=item2.getCount() ||
-                (!(item1.isEmpty()&&item2.isEmpty()) && !ItemStack.areItemsEqual(item1,item2))) {
+            if(item1.isItemEqual(item2) && item1.getNbt().equals(item2.getNbt())) {
                 this.setStackInSlot(i, 0, item1);
             }
         }

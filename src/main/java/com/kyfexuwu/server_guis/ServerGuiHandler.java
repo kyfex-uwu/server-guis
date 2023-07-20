@@ -30,7 +30,7 @@ public class ServerGuiHandler extends ScreenHandler {
         invSlotAmt.put(ScreenHandlerType.FURNACE,3);
         invSlotAmt.put(ScreenHandlerType.GRINDSTONE,3);
         invSlotAmt.put(ScreenHandlerType.HOPPER,5);
-        invSlotAmt.put(ScreenHandlerType.LEGACY_SMITHING,3);//pre 1.20
+        //invSlotAmt.put(ScreenHandlerType.LEGACY_SMITHING,3);//pre 1.20
         invSlotAmt.put(ScreenHandlerType.SMITHING,4);//post 1.20
         invSlotAmt.put(ScreenHandlerType.SMOKER,3);
     }
@@ -114,7 +114,8 @@ public class ServerGuiHandler extends ScreenHandler {
             var item1 = this.gui.items[i].getItem(this.player, this.argument);
             var item2 = this.inventory.getStack(i);
 
-            if(!item1.isItemEqual(item2) || !item1.getNbt().equals(item2.getNbt())) {
+
+            if(!ItemStack.areItemsEqual(item1,item2) || !item1.getNbt().equals(item2.getNbt())) {
                 this.setStackInSlot(i, 0, item1);
             }
         }

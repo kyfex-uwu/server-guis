@@ -38,7 +38,7 @@ public class ServerGUIs implements ModInitializer {
 		public static final ScreenType FURNACE = new ScreenType(ScreenHandlerType.FURNACE);
 		public static final ScreenType GRINDSTONE = new ScreenType(ScreenHandlerType.GRINDSTONE);
 		public static final ScreenType HOPPER = new ScreenType(ScreenHandlerType.HOPPER);
-		public static final ScreenType LEGACY_SMITHING = new ScreenType(ScreenHandlerType.LEGACY_SMITHING);
+		//public static final ScreenType LEGACY_SMITHING = new ScreenType(ScreenHandlerType.LEGACY_SMITHING);
 		public static final ScreenType SMITHING = new ScreenType(ScreenHandlerType.SMITHING);
 		public static final ScreenType SMOKER = new ScreenType(ScreenHandlerType.SMOKER);
 		//try to add crafting (1)

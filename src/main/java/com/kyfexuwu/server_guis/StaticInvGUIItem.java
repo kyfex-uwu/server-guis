@@ -15,6 +15,10 @@ public class StaticInvGUIItem implements InvGUIItem{
         this.display=d;
         this.clickConsumer=clickConsumer;
     }
+    public StaticInvGUIItem(ItemStack display, ClickConsumer<?> clickConsumer){
+        this.display=display;
+        this.clickConsumer=clickConsumer;
+    }
 
     @Override
     public ItemStack getItem(ServerPlayerEntity player, Object argument) {

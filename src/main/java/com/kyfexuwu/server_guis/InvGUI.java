@@ -16,13 +16,13 @@ public class InvGUI<T> {
                 new InvGUI<>(template.type, template.title, template.items, template.onClose);
     }
     public static class Template<T> {
-        public final ScreenHandlerType<?> type;
+        public final ServerGUIs.ScreenType type;
         public final Text title;
         public final InvGUIItem[] items;
         private final Builder<T> builder;
         public final CloseConsumer<T> onClose;
 
-        public Template(ScreenHandlerType<?> type, Text title, InvGUIItem[] items, CloseConsumer<T> onClose, Builder<T> builder) {
+        public Template(ServerGUIs.ScreenType type, Text title, InvGUIItem[] items, CloseConsumer<T> onClose, Builder<T> builder) {
             this.type = type;
             this.title = title;
             this.items = items;
@@ -38,18 +38,21 @@ public class InvGUI<T> {
     }
     private ServerGuiHandler handler;
     public ServerGuiHandler getHandler(){ return this.handler; }
-    public final ScreenHandlerType<?> type;
+    public final ServerGUIs.ScreenType type;
     public final Text title;
     public final InvGUIItem[] items;
     public final CloseConsumer<T> onClose;
-    public InvGUI(ScreenHandlerType<?> type, Text title, InvGUIItem[] items, CloseConsumer<T> onClose) {
+
+    public InvGUI(ServerGUIs.ScreenType type, Text title, InvGUIItem[] items, CloseConsumer<T> onClose) {
         this.type = type;
         this.title = title;
         this.items = items;
         this.onClose = onClose;
     }
+
     public void open(ServerPlayerEntity player, T argument){
         var thisObj = this;
+
         player.openHandledScreen(new NamedScreenHandlerFactory() {
             @Override
             public Text getDisplayName() {
@@ -58,7 +61,7 @@ public class InvGUI<T> {
 
             @Override
             public ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
-                thisObj.handler = new ServerGuiHandler(syncId, playerInventory, thisObj.type, thisObj, argument);
+                thisObj.handler = new ServerGuiHandler(syncId, playerInventory, thisObj.type.get(), thisObj, argument);
 
                 return thisObj.handler;
             }

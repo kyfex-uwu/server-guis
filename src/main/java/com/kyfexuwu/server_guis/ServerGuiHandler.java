@@ -27,20 +27,12 @@ public class ServerGuiHandler extends ScreenHandler {
         invSlotAmt.put(ScreenHandlerType.BEACON,1);
         invSlotAmt.put(ScreenHandlerType.BLAST_FURNACE,3);
         invSlotAmt.put(ScreenHandlerType.BREWING_STAND,5);
-        invSlotAmt.put(ScreenHandlerType.CRAFTING,10);
-        invSlotAmt.put(ScreenHandlerType.ENCHANTMENT,2);
         invSlotAmt.put(ScreenHandlerType.FURNACE,3);
         invSlotAmt.put(ScreenHandlerType.GRINDSTONE,3);
         invSlotAmt.put(ScreenHandlerType.HOPPER,5);
-        invSlotAmt.put(ScreenHandlerType.LECTERN,1);//book
-        invSlotAmt.put(ScreenHandlerType.LOOM,4);
-        invSlotAmt.put(ScreenHandlerType.MERCHANT,3);//villager with trades
-        invSlotAmt.put(ScreenHandlerType.SHULKER_BOX,27);
         invSlotAmt.put(ScreenHandlerType.LEGACY_SMITHING,3);//pre 1.20
         invSlotAmt.put(ScreenHandlerType.SMITHING,4);//post 1.20
         invSlotAmt.put(ScreenHandlerType.SMOKER,3);
-        invSlotAmt.put(ScreenHandlerType.CARTOGRAPHY_TABLE,3);
-        invSlotAmt.put(ScreenHandlerType.STONECUTTER,2);
     }
 
     public final InvGUI<?> gui;
@@ -99,13 +91,16 @@ public class ServerGuiHandler extends ScreenHandler {
         super.onSlotClick(slotIndex, button, actionType, player);
     }
 
+    private boolean closeQuietly=false;
     @Override
     public void onClosed(PlayerEntity player) {
         super.onClosed(player);
-        try {
-            this.gui.onClose.consume((ServerPlayerEntity) player, this.gui, appeaseCompiler(this.argument));
-        }catch(ClassCastException e){
-            this.gui.onClose.consume((ServerPlayerEntity) player, this.gui, null);
+        if(!this.closeQuietly) {
+            try {
+                this.gui.onClose.consume((ServerPlayerEntity) player, this.gui, appeaseCompiler(this.argument));
+            } catch (ClassCastException e) {
+                this.gui.onClose.consume((ServerPlayerEntity) player, this.gui, null);
+            }
         }
     }
     private final ClickConsumer<?>[] consumers;
@@ -123,6 +118,11 @@ public class ServerGuiHandler extends ScreenHandler {
                 this.setStackInSlot(i, 0, item1);
             }
         }
+    }
+
+    public void closeQuietly(){
+        this.closeQuietly=true;
+        this.player.closeHandledScreen();
     }
 
     private static <T> T appeaseCompiler(Object toConvert){

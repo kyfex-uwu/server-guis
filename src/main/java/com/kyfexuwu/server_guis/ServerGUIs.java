@@ -49,14 +49,13 @@ public class ServerGUIs implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		if(MinecraftClient.class.getSimpleName().equals("MinecraftClient")) Testing.test();
+		//if(MinecraftClient.class.getSimpleName().equals("MinecraftClient")) Testing.test();
 		LOGGER.info("Server GUIs loaded!");
 	}
 
 	public static <T> ClickConsumer<T> nothingClick(){ return (_1,_2,_3,_4,_5,_6)->{}; }
-	public static <T> CloseConsumer<T> nothingClose(){ return (_1,_2,_3)->{}; }
 
-	public static InvGUIItem IMMOVABLE = new InvGUIItem() {
+	public static final InvGUIItem IMMOVABLE = new InvGUIItem() {
 		private static final ItemStack item = Items.BLACK_STAINED_GLASS_PANE.getDefaultStack().setCustomName(Text.of("§f"));
 		private static final ClickConsumer<?> onClick = ServerGUIs.nothingClick();
 
@@ -64,6 +63,17 @@ public class ServerGUIs implements ModInitializer {
 		public ItemStack getItem(ServerPlayerEntity player, Object argument) { return item; }
 		@Override
 		public ClickConsumer<?> onClick() { return onClick; }
+	};
+	public static final InvGUIItem EMPTY = new InvGUIItem() {
+		@Override
+		public ItemStack getItem(ServerPlayerEntity player, Object argument) {
+			return ItemStack.EMPTY;
+		}
+
+		@Override
+		public ClickConsumer<?> onClick() {
+			return ServerGUIs.nothingClick();
+		}
 	};
 
 	public static ItemStack getPlayerHead(int i1, int i2, int i3, int i4, String textureString){

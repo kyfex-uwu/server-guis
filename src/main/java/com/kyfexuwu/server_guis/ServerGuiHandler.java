@@ -37,8 +37,8 @@ public class ServerGuiHandler extends ScreenHandler {
 
     public final InvGUI<?> gui;
     public final Inventory inventory;
-    private final ServerPlayerEntity player;
-    private final Object argument;
+    final ServerPlayerEntity player;
+    final Object argument;
 
     public ServerGuiHandler(int syncId, PlayerInventory playerInventory, ScreenHandlerType<?> type, InvGUI<?> gui, Object argument) {
         super(type, syncId);
@@ -80,11 +80,7 @@ public class ServerGuiHandler extends ScreenHandler {
     public void onSlotClick(int slotIndex, int button, SlotActionType actionType, PlayerEntity player) {
         if(slotIndex>=0&&slotIndex<this.inventory.size()-36){
             if(this.consumers[slotIndex]!=null){
-                try {
-                    this.consumers[slotIndex].consume(slotIndex, button, actionType, (ServerPlayerEntity) player, this.gui, appeaseCompiler(this.argument));
-                }catch(ClassCastException e){
-                    this.consumers[slotIndex].consume(slotIndex, button, actionType, (ServerPlayerEntity) player, this.gui, null);
-                }
+                this.consumers[slotIndex].consume(slotIndex, button, actionType, (ServerPlayerEntity) player, this.gui, appeaseCompiler(this.argument));
             }
             return;
         }
@@ -96,11 +92,7 @@ public class ServerGuiHandler extends ScreenHandler {
     public void onClosed(PlayerEntity player) {
         super.onClosed(player);
         if(!this.closeQuietly) {
-            try {
-                this.gui.onClose.consume((ServerPlayerEntity) player, this.gui, appeaseCompiler(this.argument));
-            } catch (ClassCastException e) {
-                this.gui.onClose.consume((ServerPlayerEntity) player, this.gui, null);
-            }
+            this.gui.onClose();
         }
     }
     private final ClickConsumer<?>[] consumers;
@@ -126,7 +118,11 @@ public class ServerGuiHandler extends ScreenHandler {
         this.player.closeHandledScreen();
     }
 
-    private static <T> T appeaseCompiler(Object toConvert){
-        return (T) toConvert;
+    static <T> T appeaseCompiler(Object toConvert){
+        try {
+            return (T) toConvert;
+        }catch(ClassCastException e){
+            return null;
+        }
     }
 }

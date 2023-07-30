@@ -13,24 +13,35 @@ public class InvGUI<T> {
     }
     public static <T> Builder<T> defaultBuilder() {
         return (player, template, arg) ->
-                new InvGUI<>(template.type, template.title, template.items, template.onClose);
+                new InvGUI<>(template.type, template.title, template.items);
     }
     public static class Template<T> {
         public final ServerGUIs.ScreenType type;
         public final Text title;
         public final InvGUIItem[] items;
         private final Builder<T> builder;
-        public final CloseConsumer<T> onClose;
+        private CloseConsumer<T> onCloseConsumer = (player, thisInv, argument) -> { };
+        private AnvilTypeConsumer<T> onAnvilTypeConsumer = (player, thisInv, argument, newText) -> { };
 
-        public Template(ServerGUIs.ScreenType type, Text title, InvGUIItem[] items, CloseConsumer<T> onClose, Builder<T> builder) {
+        public Template(ServerGUIs.ScreenType type, Text title, InvGUIItem[] items, Builder<T> builder) {
             this.type = type;
             this.title = title;
             this.items = items;
             this.builder = builder;
-            this.onClose = onClose;
+        }
+        public Template<T> onClose(CloseConsumer<T> onClose){
+            this.onCloseConsumer=onClose;
+            return this;
+        }
+        public Template<T> onAnvilType(AnvilTypeConsumer<T> onAnvilType){
+            this.onAnvilTypeConsumer=onAnvilType;
+            return this;
         }
         public InvGUI<T> build(ServerPlayerEntity player, T arg){
-            return this.builder.build(player,this, arg);
+            var toReturn = this.builder.build(player,this, arg);
+            toReturn.onClose=this.onCloseConsumer;
+            toReturn.onAnvilType=this.onAnvilTypeConsumer;
+            return toReturn;
         }
         public void buildAndOpen(ServerPlayerEntity player, T arg){
             this.build(player, arg).open(player, arg);
@@ -41,13 +52,21 @@ public class InvGUI<T> {
     public final ServerGUIs.ScreenType type;
     public final Text title;
     public final InvGUIItem[] items;
-    public final CloseConsumer<T> onClose;
+    private CloseConsumer<T> onClose;
+    private AnvilTypeConsumer<T> onAnvilType;
+    public void onClose(){
+        this.onClose.consume(this.getHandler().player, this, ServerGuiHandler.appeaseCompiler(this.getHandler().argument));
+    }
+    public void onAnvilType(String newText){
+        this.anvilText=newText;
+        this.onAnvilType.consume(this.getHandler().player, this, ServerGuiHandler.appeaseCompiler(this.getHandler().argument),
+                newText);
+    }
 
-    public InvGUI(ServerGUIs.ScreenType type, Text title, InvGUIItem[] items, CloseConsumer<T> onClose) {
+    public InvGUI(ServerGUIs.ScreenType type, Text title, InvGUIItem[] items) {
         this.type = type;
         this.title = title;
         this.items = items;
-        this.onClose = onClose;
     }
 
     public void open(ServerPlayerEntity player, T argument){
@@ -66,5 +85,10 @@ public class InvGUI<T> {
                 return thisObj.handler;
             }
         });
+    }
+
+    private String anvilText="";
+    public String getAnvilText(){
+        return anvilText;
     }
 }

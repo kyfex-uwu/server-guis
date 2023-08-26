@@ -6,53 +6,31 @@ import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.server.network.ServerPlayerEntity;
 
-import java.util.HashMap;
-
 public class ServerGuiHandler extends ScreenHandler {
-    public static final HashMap<ScreenHandlerType<?>, Integer> invSlotAmt = new HashMap<>();
-    static{
-        invSlotAmt.put(ScreenHandlerType.GENERIC_9X1,9);
-        invSlotAmt.put(ScreenHandlerType.GENERIC_9X2,18);
-        invSlotAmt.put(ScreenHandlerType.GENERIC_9X3,27);
-        invSlotAmt.put(ScreenHandlerType.GENERIC_9X4,36);
-        invSlotAmt.put(ScreenHandlerType.GENERIC_9X5,45);
-        invSlotAmt.put(ScreenHandlerType.GENERIC_9X6,54);
-        invSlotAmt.put(ScreenHandlerType.GENERIC_3X3,9);
-        invSlotAmt.put(ScreenHandlerType.ANVIL,3);
-        invSlotAmt.put(ScreenHandlerType.BEACON,1);
-        invSlotAmt.put(ScreenHandlerType.BLAST_FURNACE,3);
-        invSlotAmt.put(ScreenHandlerType.BREWING_STAND,5);
-        invSlotAmt.put(ScreenHandlerType.FURNACE,3);
-        invSlotAmt.put(ScreenHandlerType.GRINDSTONE,3);
-        invSlotAmt.put(ScreenHandlerType.HOPPER,5);
-        //invSlotAmt.put(ScreenHandlerType.LEGACY_SMITHING,3);//pre 1.20
-        invSlotAmt.put(ScreenHandlerType.SMITHING,4);//post 1.20
-        invSlotAmt.put(ScreenHandlerType.SMOKER,3);
-    }
 
     public final InvGUI<?> gui;
     public final Inventory inventory;
+    public final ServerGUIs.ScreenType type;
     final ServerPlayerEntity player;
     final Object argument;
 
-    public ServerGuiHandler(int syncId, PlayerInventory playerInventory, ScreenHandlerType<?> type, InvGUI<?> gui, Object argument) {
-        super(type, syncId);
+    public ServerGuiHandler(int syncId, PlayerInventory playerInventory, ServerGUIs.ScreenType type, InvGUI<?> gui, Object argument) {
+        super(type.type, syncId);
+        this.type=type;
 
-        int invSize = invSlotAmt.get(type);
-        this.consumers = new ClickConsumer[invSize];
+        this.consumers = new ClickConsumer[type.slotCount];
 
         this.argument = argument;
 
-        this.inventory = new SimpleInventory(invSize +36);
+        this.inventory = new SimpleInventory(type.slotCount +36);
         this.inventory.onOpen(playerInventory.player);
 
         this.player = (ServerPlayerEntity) playerInventory.player;
-        for(int i = 0; i < invSize; i++){
+        for(int i = 0; i < type.slotCount; i++){
             this.addSlot(new Slot(this.inventory, i, 0, 0));
             this.putInvGUIItem(i, gui.items[i]);
         }
@@ -71,7 +49,9 @@ public class ServerGuiHandler extends ScreenHandler {
 
 
     @Override
-    public ItemStack quickMove(PlayerEntity player1, int slot) { return ItemStack.EMPTY; }
+    public ItemStack quickMove(PlayerEntity player1, int slot) {
+        return this.gui.onShiftClick(slot);
+    }
 
     @Override
     public boolean canUse(PlayerEntity player1) { return true; }
@@ -106,8 +86,10 @@ public class ServerGuiHandler extends ScreenHandler {
             var item1 = this.gui.items[i].getItem(this.player, this.argument);
             var item2 = this.inventory.getStack(i);
 
-
-            if(!ItemStack.areItemsEqual(item1,item2) || !item1.getNbt().equals(item2.getNbt())) {
+            if(!ItemStack.areItemsEqual(item1,item2) || (
+                    item1.hasNbt()?
+                            !item1.getNbt().equals(item2.getNbt()):
+                            !item2.hasNbt())) {
                 this.setStackInSlot(i, 0, item1);
             }
         }

@@ -2,6 +2,7 @@ package com.kyfexuwu.server_guis;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.item.ItemStack;
 import net.minecraft.screen.*;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
@@ -22,6 +23,7 @@ public class InvGUI<T> {
         private final Builder<T> builder;
         private CloseConsumer<T> onCloseConsumer = (player, thisInv, argument) -> { };
         private AnvilTypeConsumer<T> onAnvilTypeConsumer = (player, thisInv, argument, newText) -> { };
+        private ShiftClickConsumer<T> onShiftClickConsumer = (player, thisInv, argument, slotNum) -> ItemStack.EMPTY;
 
         public Template(ServerGUIs.ScreenType type, Text title, InvGUIItem[] items, Builder<T> builder) {
             this.type = type;
@@ -37,10 +39,15 @@ public class InvGUI<T> {
             this.onAnvilTypeConsumer=onAnvilType;
             return this;
         }
+        public Template<T> onShiftClick(ShiftClickConsumer<T> onShiftClick){
+            this.onShiftClickConsumer=onShiftClick;
+            return this;
+        }
         public InvGUI<T> build(ServerPlayerEntity player, T arg){
             var toReturn = this.builder.build(player,this, arg);
             toReturn.onClose=this.onCloseConsumer;
             toReturn.onAnvilType=this.onAnvilTypeConsumer;
+            toReturn.onShiftClick=this.onShiftClickConsumer;
             return toReturn;
         }
         public void buildAndOpen(ServerPlayerEntity player, T arg){
@@ -54,6 +61,7 @@ public class InvGUI<T> {
     public final InvGUIItem[] items;
     private CloseConsumer<T> onClose;
     private AnvilTypeConsumer<T> onAnvilType;
+    private ShiftClickConsumer<T> onShiftClick;
     public void onClose(){
         this.onClose.consume(this.getHandler().player, this, ServerGuiHandler.appeaseCompiler(this.getHandler().argument));
     }
@@ -61,6 +69,10 @@ public class InvGUI<T> {
         this.anvilText=newText;
         this.onAnvilType.consume(this.getHandler().player, this, ServerGuiHandler.appeaseCompiler(this.getHandler().argument),
                 newText);
+    }
+    public ItemStack onShiftClick(int slotNum){
+        return this.onShiftClick.consume(this.getHandler().player,
+                this,ServerGuiHandler.appeaseCompiler(this.getHandler().argument),slotNum);
     }
 
     public InvGUI(ServerGUIs.ScreenType type, Text title, InvGUIItem[] items) {
@@ -80,7 +92,7 @@ public class InvGUI<T> {
 
             @Override
             public ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
-                thisObj.handler = new ServerGuiHandler(syncId, playerInventory, thisObj.type.get(), thisObj, argument);
+                thisObj.handler = new ServerGuiHandler(syncId, playerInventory, thisObj.type, thisObj, argument);
 
                 return thisObj.handler;
             }

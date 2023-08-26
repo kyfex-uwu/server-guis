@@ -18,33 +18,35 @@ import org.slf4j.LoggerFactory;
 public class ServerGUIs implements ModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger("Server GUIs");
 
-	public static class ScreenType{
-		private final ScreenHandlerType<?> type;
-		private ScreenType(ScreenHandlerType<?> type){
-			this.type=type;
-		}
-		public ScreenHandlerType<?> get(){ return this.type; }
-		public static final ScreenType GENERIC_9X1 = new ScreenType(ScreenHandlerType.GENERIC_9X1);
-		public static final ScreenType GENERIC_9X2 = new ScreenType(ScreenHandlerType.GENERIC_9X2);
-		public static final ScreenType GENERIC_9X3 = new ScreenType(ScreenHandlerType.GENERIC_9X3);
-		public static final ScreenType GENERIC_9X4 = new ScreenType(ScreenHandlerType.GENERIC_9X4);
-		public static final ScreenType GENERIC_9X5 = new ScreenType(ScreenHandlerType.GENERIC_9X5);
-		public static final ScreenType GENERIC_9X6 = new ScreenType(ScreenHandlerType.GENERIC_9X6);
-		public static final ScreenType GENERIC_3X3 = new ScreenType(ScreenHandlerType.GENERIC_3X3);
-		public static final ScreenType ANVIL = new ScreenType(ScreenHandlerType.ANVIL);
-		public static final ScreenType BEACON = new ScreenType(ScreenHandlerType.BEACON);
-		public static final ScreenType BLAST_FURNACE = new ScreenType(ScreenHandlerType.BLAST_FURNACE);
-		public static final ScreenType BREWING_STAND = new ScreenType(ScreenHandlerType.BREWING_STAND);
-		public static final ScreenType FURNACE = new ScreenType(ScreenHandlerType.FURNACE);
-		public static final ScreenType GRINDSTONE = new ScreenType(ScreenHandlerType.GRINDSTONE);
-		public static final ScreenType HOPPER = new ScreenType(ScreenHandlerType.HOPPER);
-		//public static final ScreenType LEGACY_SMITHING = new ScreenType(ScreenHandlerType.LEGACY_SMITHING);
-		public static final ScreenType SMITHING = new ScreenType(ScreenHandlerType.SMITHING);
-		public static final ScreenType SMOKER = new ScreenType(ScreenHandlerType.SMOKER);
+	public enum ScreenType{
+		GENERIC_9X1(ScreenHandlerType.GENERIC_9X1,9),
+		GENERIC_9X2(ScreenHandlerType.GENERIC_9X2,18),
+		GENERIC_9X3(ScreenHandlerType.GENERIC_9X3,27),
+		GENERIC_9X4(ScreenHandlerType.GENERIC_9X4,36),
+		GENERIC_9X5(ScreenHandlerType.GENERIC_9X5,45),
+		GENERIC_9X6(ScreenHandlerType.GENERIC_9X6,54),
+		GENERIC_3X3(ScreenHandlerType.GENERIC_3X3,9),
+		ANVIL(ScreenHandlerType.ANVIL,3),
+		BEACON(ScreenHandlerType.BEACON,1),
+		BLAST_FURNACE(ScreenHandlerType.BLAST_FURNACE,3),
+		BREWING_STAND(ScreenHandlerType.BREWING_STAND,5),
+		FURNACE(ScreenHandlerType.FURNACE,3),
+		GRINDSTONE(ScreenHandlerType.GRINDSTONE,3),
+		HOPPER(ScreenHandlerType.HOPPER,5),
+		//LEGACY_SMITHING(ScreenHandlerType.LEGACY_SMITHING),
+		SMITHING(ScreenHandlerType.SMITHING,4),
+		SMOKER(ScreenHandlerType.SMOKER,3);
 		//try to add crafting (1)
 		//try to add enchanting (2)
 		//try to add loom and stonecutter (3)
 		//cartography table look into (4)
+
+		public final ScreenHandlerType<?> type;
+		public final int slotCount;
+		ScreenType(ScreenHandlerType<?> type, int slotCount){
+			this.type=type;
+			this.slotCount=slotCount;
+		}
 	}
 
 	@Override

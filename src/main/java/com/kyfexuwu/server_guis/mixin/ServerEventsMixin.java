@@ -29,7 +29,7 @@ public class ServerEventsMixin {
     public void onUpdateBeacon__serverguis(UpdateBeaconC2SPacket packet, CallbackInfo ci) {
         NetworkThreadUtils.forceMainThread(packet, (ServerPlayNetworkHandler)(Object)this,
                 this.player.getServerWorld());
-        if (this.player.currentScreenHandler instanceof ServerGuiHandler handler) {;
+        if (this.player.currentScreenHandler instanceof ServerGuiHandler handler) {
             handler.gui.onBeaconChange(packet.getPrimaryEffectId(), packet.getSecondaryEffectId());
         }
     }

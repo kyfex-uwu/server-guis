@@ -33,7 +33,7 @@ public class ServerGuiHandler extends ScreenHandler {
         this.player = (ServerPlayerEntity) playerInventory.player;
         for(int i = 0; i < type.slotCount; i++){
             this.addSlot(new Slot(this.inventory, i, 0, 0));
-            this.putInvGUIItem(i, gui.items[i]);
+            this.putInvGUIItem(i, gui.items.length>i ? gui.items[i] : ServerGUIs.EMPTY);
         }
 
         for(int y = 0; y < 3; y++) {
@@ -46,6 +46,15 @@ public class ServerGuiHandler extends ScreenHandler {
         }
 
         this.gui=gui;
+
+        this.addProperties(this.gui.propertyDelegate);
+
+        if(this.type == ServerGUIs.ScreenType.FURNACE ||
+                this.type == ServerGUIs.ScreenType.BLAST_FURNACE ||
+                this.type == ServerGUIs.ScreenType.SMOKER){
+            this.gui.propertyDelegate.set(3, 1000);
+            this.gui.propertyDelegate.set(1, 1000);
+        }
     }
 
 

@@ -16,26 +16,25 @@ public class InvGUI<T> {
     public interface Builder<T>{
         InvGUI<T> build(ServerPlayerEntity player, Template<T> template, T argument);
     }
-    public static <T> Builder<T> defaultBuilder() {
-        return (player, template, arg) ->
-                new InvGUI<>(template.type, template.title, template.items);
-    }
     public static class Template<T> {
         public final ServerGUIs.ScreenType type;
         public final Text title;
         public final InvGUIItem[] items;
-        private final Builder<T> builder;
+        private Builder<T> builder = (player, template, arg) -> new InvGUI<>(template.type, template.title, template.items);
         private CloseConsumer<T> onCloseConsumer = (player, thisInv, argument) -> { };
         private ShiftClickConsumer<T> onShiftClickConsumer = (player, thisInv, argument, slotNum) -> ItemStack.EMPTY;
         private SlotUpdateConsumer<T> onSlotUpdateConsumer = (player, thisInv, argument, slotNum, stack) -> {};
         private PropertyUpdateConsumer<T> onPropertyUpdateConsumer = (player, thisInv, argument, property, value) -> {};
         private AnvilTypeConsumer<T> onAnvilTypeConsumer = (player, thisInv, argument, newText) -> { };
         private BeaconInteractionConsumer<T> onBeaconChangeConsumer = (player, thisInv, argument, effect1, effect2) -> { };
-        public Template(ServerGUIs.ScreenType type, Text title, InvGUIItem[] items, Builder<T> builder) {
+        public Template(ServerGUIs.ScreenType type, Text title, InvGUIItem[] items) {
             this.type = type;
             this.title = title;
             this.items = items;
-            this.builder = builder;
+        }
+        public Template<T> toBuild(Builder<T> builder){
+            this.builder=builder;
+            return this;
         }
         public Template<T> onClose(CloseConsumer<T> onClose){
             this.onCloseConsumer=onClose;
@@ -80,6 +79,7 @@ public class InvGUI<T> {
     public final ServerGUIs.ScreenType type;
     public final Text title;
     public final InvGUIItem[] items;
+    public final PropertyDelegate propertyDelegate;
     private CloseConsumer<T> onClose;
     private ShiftClickConsumer<T> onShiftClick;
     private SlotUpdateConsumer<T> onSlotUpdate;
@@ -121,6 +121,8 @@ public class InvGUI<T> {
         this.type = type;
         this.title = title;
         this.items = items;
+
+        this.propertyDelegate = new ArrayPropertyDelegate(type.propCount);
     }
 
     public void open(ServerPlayerEntity player, T argument){
@@ -143,7 +145,6 @@ public class InvGUI<T> {
 
                     @Override
                     public void onPropertyUpdate(ScreenHandler handler, int property, int value) {
-                        System.out.println("aeee");
                         thisObj.onPropertyUpdate(property, value);//todo: make the properties human readable?
                     }
                 });

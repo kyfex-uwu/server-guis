@@ -1,5 +1,6 @@
-package com.kyfexuwu.server_guis;
+package com.kyfexuwu.server_guis.consumers;
 
+import com.kyfexuwu.server_guis.InvGUI;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 @FunctionalInterface

@@ -1,8 +1,8 @@
 package com.kyfexuwu.server_guis;
 
-import net.fabricmc.api.ModInitializer;
+import com.kyfexuwu.server_guis.consumers.ClickConsumer;
+import net.fabricmc.api.DedicatedServerModInitializer;
 import net.minecraft.block.Blocks;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
@@ -10,12 +10,13 @@ import net.minecraft.nbt.NbtIntArray;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.screen.ScreenHandlerType;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ServerGUIs implements ModInitializer {
+public class ServerGUIs implements DedicatedServerModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger("Server GUIs");
 
 	public enum ScreenType{
@@ -50,12 +51,12 @@ public class ServerGUIs implements ModInitializer {
 	}
 
 	@Override
-	public void onInitialize() {
-		//if(MinecraftClient.class.getSimpleName().equals("MinecraftClient")) Testing.test();
+	public void onInitializeServer() {
+		if(MinecraftServer.class.getSimpleName().equals("MinecraftServer")) Testing.test();
 		LOGGER.info("Server GUIs loaded!");
 	}
 
-	public static <T> ClickConsumer<T> nothingClick(){ return (_1,_2,_3,_4,_5,_6)->{}; }
+	public static <T> ClickConsumer<T> nothingClick(){ return (_1, _2, _3, _4, _5, _6)->{}; }
 
 	public static final InvGUIItem IMMOVABLE = new InvGUIItem() {
 		private static final ItemStack item = Items.BLACK_STAINED_GLASS_PANE.getDefaultStack().setCustomName(Text.of("§f"));

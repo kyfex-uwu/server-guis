@@ -1,11 +1,15 @@
 package com.kyfexuwu.server_guis;
 
+import com.kyfexuwu.server_guis.consumers.*;
+import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.*;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
+
+import java.util.Optional;
 
 public class InvGUI<T> {
     @FunctionalInterface
@@ -22,9 +26,11 @@ public class InvGUI<T> {
         public final InvGUIItem[] items;
         private final Builder<T> builder;
         private CloseConsumer<T> onCloseConsumer = (player, thisInv, argument) -> { };
-        private AnvilTypeConsumer<T> onAnvilTypeConsumer = (player, thisInv, argument, newText) -> { };
         private ShiftClickConsumer<T> onShiftClickConsumer = (player, thisInv, argument, slotNum) -> ItemStack.EMPTY;
-
+        private SlotUpdateConsumer<T> onSlotUpdateConsumer = (player, thisInv, argument, slotNum, stack) -> {};
+        private PropertyUpdateConsumer<T> onPropertyUpdateConsumer = (player, thisInv, argument, property, value) -> {};
+        private AnvilTypeConsumer<T> onAnvilTypeConsumer = (player, thisInv, argument, newText) -> { };
+        private BeaconInteractionConsumer<T> onBeaconChangeConsumer = (player, thisInv, argument, effect1, effect2) -> { };
         public Template(ServerGUIs.ScreenType type, Text title, InvGUIItem[] items, Builder<T> builder) {
             this.type = type;
             this.title = title;
@@ -35,19 +41,34 @@ public class InvGUI<T> {
             this.onCloseConsumer=onClose;
             return this;
         }
+        public Template<T> onShiftClick(ShiftClickConsumer<T> onShiftClick){
+            this.onShiftClickConsumer=onShiftClick;
+            return this;
+        }
+        public Template<T> onSlotUpdate(SlotUpdateConsumer<T> onSlotUpdate){
+            this.onSlotUpdateConsumer=onSlotUpdate;
+            return this;
+        }
+        public Template<T> onPropertyUpdate(PropertyUpdateConsumer<T> onPropertyUpdate){
+            this.onPropertyUpdateConsumer=onPropertyUpdate;
+            return this;
+        }
         public Template<T> onAnvilType(AnvilTypeConsumer<T> onAnvilType){
             this.onAnvilTypeConsumer=onAnvilType;
             return this;
         }
-        public Template<T> onShiftClick(ShiftClickConsumer<T> onShiftClick){
-            this.onShiftClickConsumer=onShiftClick;
+        public Template<T> onBeaconChange(BeaconInteractionConsumer<T> onBeaconChange){
+            this.onBeaconChangeConsumer=onBeaconChange;
             return this;
         }
         public InvGUI<T> build(ServerPlayerEntity player, T arg){
             var toReturn = this.builder.build(player,this, arg);
             toReturn.onClose=this.onCloseConsumer;
-            toReturn.onAnvilType=this.onAnvilTypeConsumer;
             toReturn.onShiftClick=this.onShiftClickConsumer;
+            toReturn.onSlotUpdate=this.onSlotUpdateConsumer;
+            toReturn.onPropertyUpdate=this.onPropertyUpdateConsumer;
+            toReturn.onAnvilType=this.onAnvilTypeConsumer;
+            toReturn.onBeaconChange=this.onBeaconChangeConsumer;
             return toReturn;
         }
         public void buildAndOpen(ServerPlayerEntity player, T arg){
@@ -60,19 +81,40 @@ public class InvGUI<T> {
     public final Text title;
     public final InvGUIItem[] items;
     private CloseConsumer<T> onClose;
-    private AnvilTypeConsumer<T> onAnvilType;
     private ShiftClickConsumer<T> onShiftClick;
+    private SlotUpdateConsumer<T> onSlotUpdate;
+    private PropertyUpdateConsumer<T> onPropertyUpdate;
+    private AnvilTypeConsumer<T> onAnvilType;
+    private BeaconInteractionConsumer<T> onBeaconChange;
     public void onClose(){
-        this.onClose.consume(this.getHandler().player, this, ServerGuiHandler.appeaseCompiler(this.getHandler().argument));
-    }
-    public void onAnvilType(String newText){
-        this.anvilText=newText;
-        this.onAnvilType.consume(this.getHandler().player, this, ServerGuiHandler.appeaseCompiler(this.getHandler().argument),
-                newText);
+        this.onClose.consume(this.getHandler().player,
+                this, ServerGuiHandler.appeaseCompiler(this.getHandler().argument));
     }
     public ItemStack onShiftClick(int slotNum){
         return this.onShiftClick.consume(this.getHandler().player,
-                this,ServerGuiHandler.appeaseCompiler(this.getHandler().argument),slotNum);
+                this,ServerGuiHandler.appeaseCompiler(this.getHandler().argument),
+                slotNum);
+    }
+    public void onSlotUpdate(int slotNum, ItemStack stack){
+        this.onSlotUpdate.consume(this.getHandler().player,
+                this, ServerGuiHandler.appeaseCompiler(this.getHandler().argument),
+                slotNum, stack);
+    }
+    public void onPropertyUpdate(int property, int value){
+        this.onPropertyUpdate.consume(this.getHandler().player,
+                this, ServerGuiHandler.appeaseCompiler(this.getHandler().argument),
+                property, value);
+    }
+    public void onAnvilType(String newText){
+        this.anvilText=newText;
+        this.onAnvilType.consume(this.getHandler().player,
+                this, ServerGuiHandler.appeaseCompiler(this.getHandler().argument),
+                newText);
+    }
+    public void onBeaconChange(Optional<StatusEffect> effect1, Optional<StatusEffect> effect2){
+        this.onBeaconChange.consume(this.getHandler().player,
+                this, ServerGuiHandler.appeaseCompiler(this.getHandler().argument),
+                effect1, effect2);
     }
 
     public InvGUI(ServerGUIs.ScreenType type, Text title, InvGUIItem[] items) {
@@ -93,6 +135,18 @@ public class InvGUI<T> {
             @Override
             public ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
                 thisObj.handler = new ServerGuiHandler(syncId, playerInventory, thisObj.type, thisObj, argument);
+                thisObj.handler.addListener(new ScreenHandlerListener() {
+                    @Override
+                    public void onSlotUpdate(ScreenHandler handler, int slotNum, ItemStack stack) {
+                        thisObj.onSlotUpdate(slotNum, stack);
+                    }
+
+                    @Override
+                    public void onPropertyUpdate(ScreenHandler handler, int property, int value) {
+                        System.out.println("aeee");
+                        thisObj.onPropertyUpdate(property, value);//todo: make the properties human readable?
+                    }
+                });
 
                 return thisObj.handler;
             }

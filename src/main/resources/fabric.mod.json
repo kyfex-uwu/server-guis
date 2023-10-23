@@ -16,9 +16,9 @@
   "license": "CC0-1.0",
   "icon": "assets/server-guis/icon.png",
 
-  "environment": "*",
+  "environment": "server",
   "entrypoints": {
-    "main": [
+    "server": [
       "com.kyfexuwu.server_guis.ServerGUIs"
     ]
   },

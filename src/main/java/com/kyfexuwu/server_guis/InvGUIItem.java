@@ -1,5 +1,6 @@
 package com.kyfexuwu.server_guis;
 
+import com.kyfexuwu.server_guis.consumers.ClickConsumer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 
@@ -23,17 +24,6 @@ public interface InvGUIItem{
             this.item=item;
         }
     }
-    InvGUIItem EMPTY = new InvGUIItem() {
-        @Override
-        public ItemStack getItem(ServerPlayerEntity player, Object argument) {
-            return ItemStack.EMPTY;
-        }
-
-        @Override
-        public ClickConsumer<?> onClick() {
-            return ServerGUIs.nothingClick();
-        }
-    };
     static InvGUIItem[] decode(String map, InvGUIItem.InvGUIEntry... translations){
         var toReturn = new InvGUIItem[map.length()];
         for(int i=0;i<toReturn.length;i++){
@@ -43,7 +33,7 @@ public interface InvGUIItem{
             if(toSet.isPresent())
                 toReturn[i] = toSet.get().item.get();
             else
-                toReturn[i] = EMPTY;
+                toReturn[i] = ServerGUIs.EMPTY;
         }
 
         return toReturn;

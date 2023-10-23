@@ -1,5 +1,6 @@
 package com.kyfexuwu.server_guis;
 
+import com.kyfexuwu.server_guis.consumers.ClickConsumer;
 import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;

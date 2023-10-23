@@ -4,6 +4,7 @@
   "package": "com.kyfexuwu.server_guis.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "ServerEventsMixin"
   ],
   "injectors": {
     "defaultRequire": 1

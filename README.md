@@ -5,4 +5,4 @@ versions:
  - 1.19.4
  - 1.20.1
 
-other fabric versions soon! although i think all i need to do is just change the version number lol
+other fabric versions soon! although i think all i need to do is just change the version number lol (edit: yup)

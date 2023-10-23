@@ -1,5 +1,5 @@
 # server-guis
-A utility server-side Fabric mod that lets you easily create server-side GUIs
+A Fabric utility mod that lets you easily create server-side GUIs
 
 versions:
  - 1.19.4

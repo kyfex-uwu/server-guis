@@ -19,7 +19,7 @@ public class ServerEventsMixin {
     @Inject(method="onRenameItem",at=@At("HEAD"))
     public void onRenameItem__serverguis(RenameItemC2SPacket packet, CallbackInfo ci) {
         NetworkThreadUtils.forceMainThread(packet, (ServerPlayNetworkHandler)(Object)this,
-                this.player.getServerWorld());
+                this.player.getWorld());
         if (this.player.currentScreenHandler instanceof ServerGuiHandler handler) {
             handler.gui.onAnvilType(packet.getName());
         }
@@ -28,7 +28,7 @@ public class ServerEventsMixin {
     @Inject(method="onUpdateBeacon",at=@At("HEAD"))
     public void onUpdateBeacon__serverguis(UpdateBeaconC2SPacket packet, CallbackInfo ci) {
         NetworkThreadUtils.forceMainThread(packet, (ServerPlayNetworkHandler)(Object)this,
-                this.player.getServerWorld());
+                this.player.getWorld());
         if (this.player.currentScreenHandler instanceof ServerGuiHandler handler) {
             handler.gui.onBeaconChange(packet.getPrimaryEffectId(), packet.getSecondaryEffectId());
         }

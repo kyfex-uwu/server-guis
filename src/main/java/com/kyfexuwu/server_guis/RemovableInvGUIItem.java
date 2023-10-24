@@ -20,10 +20,67 @@ public class RemovableInvGUIItem implements InvGUIItem{
     @Override
     public ClickConsumer<?> onClick() {
         return (slotIndex, button, actionType, player, thisInv, argument) -> {
-            //todo qwq
-            var temp = player.currentScreenHandler.getCursorStack();
-            player.currentScreenHandler.setCursorStack(this.display);
-            this.display = temp;
+            switch(actionType){
+                case SWAP -> {
+                    int slot=thisInv.type.slotCount+27+button;
+                    if(button==40) break;//offhand
+                    var playerStack = player.currentScreenHandler.getSlot(slot).getStack();
+                    player.currentScreenHandler.setStackInSlot(slot,0,this.display);
+                    this.display=playerStack;
+                }
+                case THROW -> {//done
+                    var decAmt = button==0 ? 1 : this.display.getMaxCount();
+                    var newCount = Math.max(0,this.display.getCount()-decAmt);
+                    player.dropItem(this.display.copyWithCount(this.display.getCount()-newCount),true);
+                    this.display.setCount(newCount);
+                }
+                case CLONE -> {//done
+                    if(!player.isCreative()) break;
+
+                    if(player.currentScreenHandler.getCursorStack().isEmpty()){
+                        player.currentScreenHandler.setCursorStack(
+                                this.display.copyWithCount(this.display.getMaxCount()));
+                    }
+                }
+                case QUICK_CRAFT -> {
+                    //dragging item
+                }
+                case PICKUP -> {//done
+                    if(button==0){
+                        var playerStack = player.currentScreenHandler.getCursorStack();
+                        if(playerStack.isEmpty() || !playerStack.isOf(this.display.getItem())){
+                            player.currentScreenHandler.setCursorStack(this.display);
+                            this.display=playerStack;
+                        }else{
+                            var totalCount = this.display.getCount()+playerStack.getCount();
+                            var thisCount=Math.min(playerStack.getMaxCount(),
+                                    this.display.getCount()+playerStack.getCount());
+                            this.display.setCount(thisCount);
+                            playerStack.setCount(totalCount-thisCount);
+                        }
+                    }else if(button==1){
+                        var playerStack = player.currentScreenHandler.getCursorStack();
+                        if(playerStack.isEmpty()){
+                            player.currentScreenHandler.setCursorStack(
+                                    this.display.copyWithCount(this.display.getCount()-this.display.getCount()/2));
+                            this.display.setCount(this.display.getCount()/2);
+                        }else if(this.display.isEmpty()){
+                            this.display=playerStack.copyWithCount(1);
+                            playerStack.decrement(1);
+                        }else if(playerStack.isOf(this.display.getItem())){
+                            if(this.display.getItem().getMaxCount()>=this.display.getCount()+1){
+                                this.display.setCount(this.display.getCount()+1);
+                                playerStack.decrement(1);
+                            }
+                        }else{
+                            player.currentScreenHandler.setCursorStack(this.display);
+                            this.display=playerStack;
+                        }
+                    }
+                }
+            }
+
+            System.out.println(button+", "+actionType.name());
 
             thisInv.getHandler().refresh();
         };

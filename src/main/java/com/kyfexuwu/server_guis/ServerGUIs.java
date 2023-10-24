@@ -110,20 +110,19 @@ public class ServerGUIs implements DedicatedServerModInitializer {
 
 	@Override
 	public void onInitializeServer() {
-		//if(MinecraftServer.class.getSimpleName().equals("MinecraftServer")) Testing.test();
+		if(MinecraftServer.class.getSimpleName().equals("MinecraftServer")) Testing.test();
 		LOGGER.info("Server GUIs loaded!");
 	}
 
-	public static <T> ClickConsumer<T> nothingClick(){ return (_1, _2, _3, _4, _5, _6)->{}; }
-
+	public static ClickConsumer<?> nothingClick(){ return (_1, _2, _3, _4, _5, _6)->{}; }
+	private static final ClickConsumer<?> nothingClickInst = nothingClick();
 	public static final InvGUIItem IMMOVABLE = new InvGUIItem() {
 		private static final ItemStack item = Items.BLACK_STAINED_GLASS_PANE.getDefaultStack().setCustomName(Text.of("§f"));
-		private static final ClickConsumer<?> onClick = ServerGUIs.nothingClick();
 
 		@Override
 		public ItemStack getItem(ServerPlayerEntity player, Object argument) { return item; }
 		@Override
-		public ClickConsumer<?> onClick() { return onClick; }
+		public ClickConsumer<?> onClick() { return nothingClickInst; }
 	};
 	public static final InvGUIItem EMPTY = new InvGUIItem() {
 		@Override
@@ -132,9 +131,7 @@ public class ServerGUIs implements DedicatedServerModInitializer {
 		}
 
 		@Override
-		public ClickConsumer<?> onClick() {
-			return ServerGUIs.nothingClick();
-		}
+		public ClickConsumer<?> onClick() { return nothingClickInst; }
 	};
 
 	public static ItemStack getPlayerHead(int i1, int i2, int i3, int i4, String textureString){

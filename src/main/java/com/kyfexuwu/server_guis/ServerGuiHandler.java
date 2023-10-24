@@ -19,6 +19,18 @@ public class ServerGuiHandler extends ScreenHandler {
     final ServerPlayerEntity player;
     final Object argument;
 
+    private static class CustomSlot extends Slot{
+        private final boolean canTakeItems;
+        public CustomSlot(Inventory inventory, int index, boolean canTakeItems) {
+            super(inventory, index, 0,0);
+            this.canTakeItems=canTakeItems;
+        }
+
+        @Override
+        public boolean canTakeItems(PlayerEntity p){
+            return this.canTakeItems;
+        }
+    }
     public ServerGuiHandler(int syncId, PlayerInventory playerInventory, ServerGUIs.ScreenType type, InvGUI<?> gui, Object argument) {
         super(type.type, syncId);
         this.type=type;
@@ -32,8 +44,13 @@ public class ServerGuiHandler extends ScreenHandler {
 
         this.player = (ServerPlayerEntity) playerInventory.player;
         for(int i = 0; i < type.slotCount; i++){
-            this.addSlot(new Slot(this.inventory, i, 0, 0));
-            this.putInvGUIItem(i, gui.items.length>i ? gui.items[i] : ServerGUIs.EMPTY);
+            if(gui.items.length>i){
+                this.addSlot(new CustomSlot(this.inventory, i, gui.items[i] instanceof RemovableInvGUIItem));
+                this.putInvGUIItem(i, gui.items[i]);
+            }else{
+                this.addSlot(new CustomSlot(this.inventory, i,false));
+                this.putInvGUIItem(i, ServerGUIs.EMPTY);
+            }
         }
 
         for(int y = 0; y < 3; y++) {
@@ -70,10 +87,12 @@ public class ServerGuiHandler extends ScreenHandler {
     public void onSlotClick(int slotIndex, int button, SlotActionType actionType, PlayerEntity player) {
         if(slotIndex>=0&&slotIndex<this.inventory.size()-36){
             if(this.consumers[slotIndex]!=null){
-                this.consumers[slotIndex].consume(slotIndex, button, actionType, (ServerPlayerEntity) player, this.gui, appeaseCompiler(this.argument));
+                this.consumers[slotIndex].consume(slotIndex, button, actionType, (ServerPlayerEntity) player,
+                        this.gui, appeaseCompiler(this.argument));
             }
             return;
         }
+
         super.onSlotClick(slotIndex, button, actionType, player);
     }
 

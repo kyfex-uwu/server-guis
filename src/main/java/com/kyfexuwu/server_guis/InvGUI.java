@@ -89,6 +89,13 @@ public class InvGUI<T> {
     public void onClose(){
         this.onClose.consume(this.getHandler().player,
                 this, ServerGuiHandler.appeaseCompiler(this.getHandler().argument));
+
+        //give back removable items
+        for(InvGUIItem item : this.items){
+            if(item instanceof RemovableInvGUIItem){
+                this.getHandler().player.giveItemStack(((RemovableInvGUIItem) item).display);
+            }
+        }
     }
     public ItemStack onShiftClick(int slotNum){
         return this.onShiftClick.consume(this.getHandler().player,

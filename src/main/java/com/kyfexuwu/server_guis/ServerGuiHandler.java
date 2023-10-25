@@ -132,13 +132,13 @@ public class ServerGuiHandler extends ScreenHandler {
     }
     private final ClickConsumer<?>[] consumers;
     public void putInvGUIItem(int slot, InvGUIItem item){
-        this.setStackInSlot(slot, 0, item.getItem(this.player, this.argument));
+        this.setStackInSlot(slot, 0, item.getItem(this.player, this.gui, this.argument));
         this.consumers[slot]=item.onClick();
     }
 
     public void refresh(){
         for(int i = 0; i < this.inventory.size()-36; i++){
-            var item1 = this.gui.items[i].getItem(this.player, this.argument);
+            var item1 = this.gui.items[i].getItem(this.player, this.gui, this.argument);
             var item2 = this.inventory.getStack(i);
 
             if(!ItemStack.areItemsEqual(item1,item2) || (

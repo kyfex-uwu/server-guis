@@ -8,7 +8,7 @@ import java.util.Arrays;
 import java.util.function.Supplier;
 
 public interface InvGUIItem{
-    ItemStack getItem(ServerPlayerEntity player, Object argument);
+    ItemStack getItem(ServerPlayerEntity player, InvGUI<?> gui, Object argument);
     ClickConsumer<?> onClick();
 
     class InvGUIEntry{

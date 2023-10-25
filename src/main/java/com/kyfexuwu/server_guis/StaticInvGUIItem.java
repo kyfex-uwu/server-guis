@@ -22,7 +22,7 @@ public class StaticInvGUIItem implements InvGUIItem{
     }
 
     @Override
-    public ItemStack getItem(ServerPlayerEntity player, Object argument) {
+    public ItemStack getItem(ServerPlayerEntity player, InvGUI<?> gui, Object argument) {
         return this.display;
     }
 

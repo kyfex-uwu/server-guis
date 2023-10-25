@@ -8,7 +8,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 public class RemovableInvGUIItem implements InvGUIItem{
     public ItemStack display = Items.AIR.getDefaultStack();
     @Override
-    public ItemStack getItem(ServerPlayerEntity player, Object argument) { return this.display; }
+    public ItemStack getItem(ServerPlayerEntity player, InvGUI<?> gui, Object argument) { return this.display; }
 
     @Override
     public ClickConsumer<?> onClick() {

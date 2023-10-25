@@ -120,13 +120,13 @@ public class ServerGUIs implements DedicatedServerModInitializer {
 		private static final ItemStack item = Items.BLACK_STAINED_GLASS_PANE.getDefaultStack().setCustomName(Text.of("§f"));
 
 		@Override
-		public ItemStack getItem(ServerPlayerEntity player, Object argument) { return item; }
+		public ItemStack getItem(ServerPlayerEntity player, InvGUI<?> gui, Object argument) { return item; }
 		@Override
 		public ClickConsumer<?> onClick() { return nothingClickInst; }
 	};
 	public static final InvGUIItem EMPTY = new InvGUIItem() {
 		@Override
-		public ItemStack getItem(ServerPlayerEntity player, Object argument) {
+		public ItemStack getItem(ServerPlayerEntity player, InvGUI<?> gui, Object argument) {
 			return ItemStack.EMPTY;
 		}
 

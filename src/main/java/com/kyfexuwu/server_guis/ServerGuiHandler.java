@@ -20,16 +20,18 @@ public class ServerGuiHandler extends ScreenHandler {
     final Object argument;
 
     private static class CustomSlot extends Slot{
-        private final boolean canTakeItems;
-        public CustomSlot(Inventory inventory, int index, boolean canTakeItems) {
+        private final boolean canInteract;
+        public CustomSlot(Inventory inventory, int index, boolean canInteract) {
             super(inventory, index, 0,0);
-            this.canTakeItems=canTakeItems;
+            this.canInteract=canInteract;
         }
 
         @Override
         public boolean canTakeItems(PlayerEntity p){
-            return this.canTakeItems;
+            return this.canInteract;
         }
+        @Override
+        public boolean canInsert(ItemStack stack){ return this.canInteract; }
     }
     public ServerGuiHandler(int syncId, PlayerInventory playerInventory, ServerGUIs.ScreenType type, InvGUI<?> gui, Object argument) {
         super(type.type, syncId);
@@ -74,9 +76,33 @@ public class ServerGuiHandler extends ScreenHandler {
         }
     }
 
+    private boolean isGuiSlot(int slotIndex){
+        return slotIndex>=0&&slotIndex<this.type.slotCount;
+    }
 
     @Override
-    public ItemStack quickMove(PlayerEntity player1, int slot) {
+    public ItemStack quickMove(PlayerEntity player, int slot) {
+        if(!this.isGuiSlot(slot)){
+            //default quickmove, slot is always greater than this.type.slotCount
+
+            for(int i=0;i<this.type.slotCount;i++){
+                var stack = this.slots.get(slot).getStack();
+                if(stack.isEmpty()) break;
+                if(!this.slots.get(i).canInsert(stack)) continue;
+
+                var insertInto = this.inventory.getStack(i);
+                if(this.gui.items[i] instanceof RemovableInvGUIItem||
+                        ItemStack.canCombine(stack, insertInto)||insertInto.isEmpty()){
+                    var moveAmt = Math.min(insertInto.getMaxCount()-insertInto.getCount(),stack.getCount());
+                    var invGUIItem = (RemovableInvGUIItem) this.gui.items[i];
+                    invGUIItem.display=stack.copyWithCount(moveAmt+invGUIItem.display.getCount());
+                    stack.decrement(moveAmt);
+                }
+            }
+
+            this.refresh();
+            return ItemStack.EMPTY;
+        }
         return this.gui.onShiftClick(slot);
     }
 
@@ -85,7 +111,7 @@ public class ServerGuiHandler extends ScreenHandler {
 
     @Override
     public void onSlotClick(int slotIndex, int button, SlotActionType actionType, PlayerEntity player) {
-        if(slotIndex>=0&&slotIndex<this.inventory.size()-36){
+        if(this.isGuiSlot(slotIndex)){
             if(this.consumers[slotIndex]!=null){
                 this.consumers[slotIndex].consume(slotIndex, button, actionType, (ServerPlayerEntity) player,
                         this.gui, appeaseCompiler(this.argument));

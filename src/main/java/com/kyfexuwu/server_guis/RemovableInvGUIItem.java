@@ -96,7 +96,7 @@ public class RemovableInvGUIItem implements InvGUIItem{
                     }
                 }
                 case QUICK_MOVE -> {
-                    //shift click
+                    player.giveItemStack(player.currentScreenHandler.getSlot(slotIndex).getStack());
                 }
             }
 

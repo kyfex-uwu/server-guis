@@ -83,7 +83,7 @@ public class ServerGuiHandler extends ScreenHandler {
     @Override
     public ItemStack quickMove(PlayerEntity player, int slot) {
         if(!this.isGuiSlot(slot)){
-            //default quickmove, slot is always greater than this.type.slotCount
+            //quickmove from player to gui, slot is always greater than this.type.slotCount
 
             for(int i=0;i<this.type.slotCount;i++){
                 var stack = this.slots.get(slot).getStack();
@@ -91,10 +91,9 @@ public class ServerGuiHandler extends ScreenHandler {
                 if(!this.slots.get(i).canInsert(stack)) continue;
 
                 var insertInto = this.inventory.getStack(i);
-                if(this.gui.items[i] instanceof RemovableInvGUIItem||
-                        ItemStack.canCombine(stack, insertInto)||insertInto.isEmpty()){
+                if(this.gui.items[i] instanceof RemovableInvGUIItem invGUIItem &&
+                        (ItemStack.canCombine(stack, insertInto)||insertInto.isEmpty())){
                     var moveAmt = Math.min(insertInto.getMaxCount()-insertInto.getCount(),stack.getCount());
-                    var invGUIItem = (RemovableInvGUIItem) this.gui.items[i];
                     invGUIItem.display=stack.copyWithCount(moveAmt+invGUIItem.display.getCount());
                     stack.decrement(moveAmt);
                 }
@@ -129,6 +128,11 @@ public class ServerGuiHandler extends ScreenHandler {
         if(!this.closeQuietly) {
             this.gui.onClose();
         }
+    }
+
+    @Override
+    public boolean onButtonClick(PlayerEntity player, int id){
+        return this.gui.onButtonClick(id);
     }
     private final ClickConsumer<?>[] consumers;
     public void putInvGUIItem(int slot, InvGUIItem item){

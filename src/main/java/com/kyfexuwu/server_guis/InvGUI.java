@@ -22,6 +22,7 @@ public class InvGUI<T> {
         public final InvGUIItem[] items;
         private Builder<T> builder = (player, template, arg) -> new InvGUI<>(template.type, template.title, template.items);
         private CloseConsumer<T> onCloseConsumer = (player, thisInv, argument) -> { };
+        private ButtonClickConsumer<T> onButtonClickConsumer = (player, thisInv, argument, buttonIndex) -> true;
         private ShiftClickConsumer<T> onShiftClickConsumer = (player, thisInv, argument, slotNum) -> ItemStack.EMPTY;
         private SlotUpdateConsumer<T> onSlotUpdateConsumer = (player, thisInv, argument, slotNum, stack) -> {};
         private PropertyUpdateConsumer<T> onPropertyUpdateConsumer = (player, thisInv, argument, property, value) -> {};
@@ -38,6 +39,10 @@ public class InvGUI<T> {
         }
         public Template<T> onClose(CloseConsumer<T> onClose){
             this.onCloseConsumer=onClose;
+            return this;
+        }
+        public Template<T> onButtonClick(ButtonClickConsumer<T> onButtonClick){
+            this.onButtonClickConsumer=onButtonClick;
             return this;
         }
         public Template<T> onShiftClick(ShiftClickConsumer<T> onShiftClick){
@@ -63,6 +68,7 @@ public class InvGUI<T> {
         public InvGUI<T> build(ServerPlayerEntity player, T arg){
             var toReturn = this.builder.build(player,this, arg);
             toReturn.onClose=this.onCloseConsumer;
+            toReturn.onButtonClick=this.onButtonClickConsumer;
             toReturn.onShiftClick=this.onShiftClickConsumer;
             toReturn.onSlotUpdate=this.onSlotUpdateConsumer;
             toReturn.onPropertyUpdate=this.onPropertyUpdateConsumer;
@@ -81,46 +87,52 @@ public class InvGUI<T> {
     public final InvGUIItem[] items;
     public final PropertyDelegate propertyDelegate;
     private CloseConsumer<T> onClose;
+    private ButtonClickConsumer<T> onButtonClick;
     private ShiftClickConsumer<T> onShiftClick;
     private SlotUpdateConsumer<T> onSlotUpdate;
     private PropertyUpdateConsumer<T> onPropertyUpdate;
     private AnvilTypeConsumer<T> onAnvilType;
     private BeaconInteractionConsumer<T> onBeaconChange;
     public void onClose(){
-        this.onClose.consume(this.getHandler().player,
-                this, ServerGuiHandler.appeaseCompiler(this.getHandler().argument));
+        this.onClose.consume(this.handler.player,
+                this, ServerGuiHandler.appeaseCompiler(this.handler.argument));
 
         //give back removable items
         for(InvGUIItem item : this.items){
             if(item instanceof RemovableInvGUIItem){
-                this.getHandler().player.giveItemStack(((RemovableInvGUIItem) item).display);
+                this.handler.player.giveItemStack(((RemovableInvGUIItem) item).display);
             }
         }
     }
+    public boolean onButtonClick(int buttonIndex){
+        return this.onButtonClick.consume(this.handler.player,
+                this,ServerGuiHandler.appeaseCompiler(this.handler.argument),
+                buttonIndex);
+    }
     public ItemStack onShiftClick(int slotNum){
-        return this.onShiftClick.consume(this.getHandler().player,
-                this,ServerGuiHandler.appeaseCompiler(this.getHandler().argument),
+        return this.onShiftClick.consume(this.handler.player,
+                this,ServerGuiHandler.appeaseCompiler(this.handler.argument),
                 slotNum);
     }
     public void onSlotUpdate(int slotNum, ItemStack stack){
-        this.onSlotUpdate.consume(this.getHandler().player,
-                this, ServerGuiHandler.appeaseCompiler(this.getHandler().argument),
+        this.onSlotUpdate.consume(this.handler.player,
+                this, ServerGuiHandler.appeaseCompiler(this.handler.argument),
                 slotNum, stack);
     }
     public void onPropertyUpdate(int property, int value){
-        this.onPropertyUpdate.consume(this.getHandler().player,
-                this, ServerGuiHandler.appeaseCompiler(this.getHandler().argument),
+        this.onPropertyUpdate.consume(this.handler.player,
+                this, ServerGuiHandler.appeaseCompiler(this.handler.argument),
                 property, value);
     }
     public void onAnvilType(String newText){
         this.anvilText=newText;
-        this.onAnvilType.consume(this.getHandler().player,
-                this, ServerGuiHandler.appeaseCompiler(this.getHandler().argument),
+        this.onAnvilType.consume(this.handler.player,
+                this, ServerGuiHandler.appeaseCompiler(this.handler.argument),
                 newText);
     }
     public void onBeaconChange(Optional<StatusEffect> effect1, Optional<StatusEffect> effect2){
-        this.onBeaconChange.consume(this.getHandler().player,
-                this, ServerGuiHandler.appeaseCompiler(this.getHandler().argument),
+        this.onBeaconChange.consume(this.handler.player,
+                this, ServerGuiHandler.appeaseCompiler(this.handler.argument),
                 effect1, effect2);
     }
 

@@ -33,19 +33,28 @@ public class ServerGUIs implements DedicatedServerModInitializer {
 		BEACON(ScreenHandlerType.BEACON,1, 3),
 		BLAST_FURNACE(ScreenHandlerType.BLAST_FURNACE,3, 4),
 		BREWING_STAND(ScreenHandlerType.BREWING_STAND,5, 2),
-		//CARTOGRAPHY_TABLE(ScreenHandlerType.CARTOGRAPHY_TABLE, 3),
-		//CRAFTING(ScreenHandlerType.CRAFTING, 10),
+		CARTOGRAPHY_TABLE(ScreenHandlerType.CARTOGRAPHY_TABLE, 3),
+		CRAFTING(ScreenHandlerType.CRAFTING, 10),
 		//ENCHANTMENT(ScreenHandlerType.ENCHANTMENT, 2, 10),
 		FURNACE(ScreenHandlerType.FURNACE,3, 4),
 		GRINDSTONE(ScreenHandlerType.GRINDSTONE,3),
 		HOPPER(ScreenHandlerType.HOPPER,5),
-		//LECTERN(ScreenHandlerType.LECTERN, 1, 1), //for books
+		LECTERN(ScreenHandlerType.LECTERN, 1, 1), //for books
 		//LEGACY_SMITHING(ScreenHandlerType.LEGACY_SMITHING), //pre 1.19? maybe?
-		//LOOM(ScreenHandlerType.LOOM, 4, 1),
+		LOOM(ScreenHandlerType.LOOM, 4, 1),//make sure banner slot is banner, and dye slot is dye
 		//MERCHANT(ScreenHandlerType.MERCHANT, 3),
 		SMITHING(ScreenHandlerType.SMITHING,4),
-		SMOKER(ScreenHandlerType.SMOKER,3, 4);
-		//STONECUTTER(ScreenHandlerType.STONECUTTER, 2, 1);
+		SMOKER(ScreenHandlerType.SMOKER,3, 4),
+		STONECUTTER(ScreenHandlerType.STONECUTTER, 2, 1);
+
+		//book (edit?)
+		//command block
+		//creative inventory
+		//sign edit
+		//horse
+		//inventory?
+		//jigsaw
+		//structure block
 
 		public final ScreenHandlerType<?> type;
 		public final int slotCount;
@@ -110,10 +119,32 @@ public class ServerGUIs implements DedicatedServerModInitializer {
 
 		gui.propertyDelegate.set(0, time);
 	}
+	public static void setBannerPattern(InvGUI<?> gui, int pattern){
+		checkGUIType(gui, "Tried to set pattern of gui "+gui+", but the gui is not a loom gui!",
+				ScreenType.LOOM);
+
+		gui.propertyDelegate.set(0, pattern);
+	}
+	public static boolean handleBookPageTurning(InvGUI<?> gui, int buttonIndex){
+		checkGUIType(gui, "Tried to handle book pages of gui "+gui+", but the gui is not a lectern gui!",
+				ScreenType.LECTERN);
+
+		if(buttonIndex==1||buttonIndex==2){
+			gui.propertyDelegate.set(0, gui.propertyDelegate.get(0)-3+buttonIndex*2);
+			return true;
+		}
+		return false;
+	}
+	public static void setBookPage(InvGUI<?> gui, int pageIndex){
+		checkGUIType(gui, "Tried to set page of gui "+gui+", but the gui is not a lectern gui!",
+				ScreenType.LECTERN);
+
+		gui.propertyDelegate.set(0, pageIndex);
+	}
 
 	@Override
 	public void onInitializeServer() {
-		if(MinecraftServer.class.getSimpleName().equals("MinecraftServer")) Testing.test();
+		//if(MinecraftServer.class.getSimpleName().equals("MinecraftServer")) Testing.test();
 		LOGGER.info("Server GUIs loaded!");
 	}
 

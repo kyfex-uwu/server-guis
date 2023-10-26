@@ -33,16 +33,19 @@ public class ServerGUIs implements DedicatedServerModInitializer {
 		BEACON(ScreenHandlerType.BEACON,1, 3),
 		BLAST_FURNACE(ScreenHandlerType.BLAST_FURNACE,3, 4),
 		BREWING_STAND(ScreenHandlerType.BREWING_STAND,5, 2),
+		//CARTOGRAPHY_TABLE(ScreenHandlerType.CARTOGRAPHY_TABLE, 3),
+		//CRAFTING(ScreenHandlerType.CRAFTING, 10),
+		//ENCHANTMENT(ScreenHandlerType.ENCHANTMENT, 2, 10),
 		FURNACE(ScreenHandlerType.FURNACE,3, 4),
 		GRINDSTONE(ScreenHandlerType.GRINDSTONE,3),
 		HOPPER(ScreenHandlerType.HOPPER,5),
-		//LEGACY_SMITHING(ScreenHandlerType.LEGACY_SMITHING),
+		//LECTERN(ScreenHandlerType.LECTERN, 1, 1), //for books
+		//LEGACY_SMITHING(ScreenHandlerType.LEGACY_SMITHING), //pre 1.19? maybe?
+		//LOOM(ScreenHandlerType.LOOM, 4, 1),
+		//MERCHANT(ScreenHandlerType.MERCHANT, 3),
 		SMITHING(ScreenHandlerType.SMITHING,4),
 		SMOKER(ScreenHandlerType.SMOKER,3, 4);
-		//try to add crafting (1)
-		//try to add enchanting (2)
-		//try to add loom and stonecutter (3)
-		//cartography table look into (4)
+		//STONECUTTER(ScreenHandlerType.STONECUTTER, 2, 1);
 
 		public final ScreenHandlerType<?> type;
 		public final int slotCount;

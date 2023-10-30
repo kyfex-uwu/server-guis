@@ -33,16 +33,28 @@ public class ServerGUIs implements DedicatedServerModInitializer {
 		BEACON(ScreenHandlerType.BEACON,1, 3),
 		BLAST_FURNACE(ScreenHandlerType.BLAST_FURNACE,3, 4),
 		BREWING_STAND(ScreenHandlerType.BREWING_STAND,5, 2),
+		CARTOGRAPHY_TABLE(ScreenHandlerType.CARTOGRAPHY_TABLE, 3),
+		CRAFTING(ScreenHandlerType.CRAFTING, 10),
+		//ENCHANTMENT(ScreenHandlerType.ENCHANTMENT, 2, 10),
 		FURNACE(ScreenHandlerType.FURNACE,3, 4),
 		GRINDSTONE(ScreenHandlerType.GRINDSTONE,3),
 		HOPPER(ScreenHandlerType.HOPPER,5),
-		//LEGACY_SMITHING(ScreenHandlerType.LEGACY_SMITHING),
+		LECTERN(ScreenHandlerType.LECTERN, 1, 1), //for books
+		//LEGACY_SMITHING(ScreenHandlerType.LEGACY_SMITHING), //pre 1.19? maybe?
+		LOOM(ScreenHandlerType.LOOM, 4, 1),//make sure banner slot is banner, and dye slot is dye
+		//MERCHANT(ScreenHandlerType.MERCHANT, 3),
 		SMITHING(ScreenHandlerType.SMITHING,4),
-		SMOKER(ScreenHandlerType.SMOKER,3, 4);
-		//try to add crafting (1)
-		//try to add enchanting (2)
-		//try to add loom and stonecutter (3)
-		//cartography table look into (4)
+		SMOKER(ScreenHandlerType.SMOKER,3, 4),
+		STONECUTTER(ScreenHandlerType.STONECUTTER, 2, 1);
+
+		//book (edit?)
+		//command block
+		//creative inventory
+		//sign edit
+		//horse
+		//inventory?
+		//jigsaw
+		//structure block
 
 		public final ScreenHandlerType<?> type;
 		public final int slotCount;
@@ -107,6 +119,28 @@ public class ServerGUIs implements DedicatedServerModInitializer {
 
 		gui.propertyDelegate.set(0, time);
 	}
+	public static void setBannerPattern(InvGUI<?> gui, int pattern){
+		checkGUIType(gui, "Tried to set pattern of gui "+gui+", but the gui is not a loom gui!",
+				ScreenType.LOOM);
+
+		gui.propertyDelegate.set(0, pattern);
+	}
+	public static boolean handleBookPageTurning(InvGUI<?> gui, int buttonIndex){
+		checkGUIType(gui, "Tried to handle book pages of gui "+gui+", but the gui is not a lectern gui!",
+				ScreenType.LECTERN);
+
+		if(buttonIndex==1||buttonIndex==2){
+			gui.propertyDelegate.set(0, gui.propertyDelegate.get(0)-3+buttonIndex*2);
+			return true;
+		}
+		return false;
+	}
+	public static void setBookPage(InvGUI<?> gui, int pageIndex){
+		checkGUIType(gui, "Tried to set page of gui "+gui+", but the gui is not a lectern gui!",
+				ScreenType.LECTERN);
+
+		gui.propertyDelegate.set(0, pageIndex);
+	}
 
 	@Override
 	public void onInitializeServer() {
@@ -114,27 +148,24 @@ public class ServerGUIs implements DedicatedServerModInitializer {
 		LOGGER.info("Server GUIs loaded!");
 	}
 
-	public static <T> ClickConsumer<T> nothingClick(){ return (_1, _2, _3, _4, _5, _6)->{}; }
-
+	public static ClickConsumer<?> nothingClick(){ return (_1, _2, _3, _4, _5, _6)->{}; }
+	private static final ClickConsumer<?> nothingClickInst = nothingClick();
 	public static final InvGUIItem IMMOVABLE = new InvGUIItem() {
 		private static final ItemStack item = Items.BLACK_STAINED_GLASS_PANE.getDefaultStack().setCustomName(Text.of("§f"));
-		private static final ClickConsumer<?> onClick = ServerGUIs.nothingClick();
 
 		@Override
-		public ItemStack getItem(ServerPlayerEntity player, Object argument) { return item; }
+		public ItemStack getItem(ServerPlayerEntity player, InvGUI<?> gui, Object argument) { return item; }
 		@Override
-		public ClickConsumer<?> onClick() { return onClick; }
+		public ClickConsumer<?> onClick() { return nothingClickInst; }
 	};
 	public static final InvGUIItem EMPTY = new InvGUIItem() {
 		@Override
-		public ItemStack getItem(ServerPlayerEntity player, Object argument) {
+		public ItemStack getItem(ServerPlayerEntity player, InvGUI<?> gui, Object argument) {
 			return ItemStack.EMPTY;
 		}
 
 		@Override
-		public ClickConsumer<?> onClick() {
-			return ServerGUIs.nothingClick();
-		}
+		public ClickConsumer<?> onClick() { return nothingClickInst; }
 	};
 
 	public static ItemStack getPlayerHead(int i1, int i2, int i3, int i4, String textureString){

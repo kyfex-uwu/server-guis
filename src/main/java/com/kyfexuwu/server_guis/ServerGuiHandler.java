@@ -123,8 +123,8 @@ public class ServerGuiHandler extends ScreenHandler {
 
     private boolean closeQuietly=false;
     @Override
-    public void onClosed(PlayerEntity player) {
-        super.onClosed(player);
+    public void close(PlayerEntity player) {
+        super.close(player);
         if(!this.closeQuietly) {
             this.gui.onClose();
         }

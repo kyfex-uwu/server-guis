@@ -94,7 +94,9 @@ public class ServerGuiHandler extends ScreenHandler {
                 if(this.gui.items[i] instanceof RemovableInvGUIItem invGUIItem &&
                         (ItemStack.canCombine(stack, insertInto)||insertInto.isEmpty())){
                     var moveAmt = Math.min(insertInto.getMaxCount()-insertInto.getCount(),stack.getCount());
-                    invGUIItem.display=stack.copyWithCount(moveAmt+invGUIItem.display.getCount());
+                    var newDisp = stack.copy();
+                    newDisp.setCount(moveAmt+invGUIItem.display.getCount());
+                    invGUIItem.display=newDisp;
                     stack.decrement(moveAmt);
                 }
             }

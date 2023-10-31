@@ -1,6 +1,7 @@
 package com.kyfexuwu.server_guis.mixin;
 
 import com.kyfexuwu.server_guis.ServerGuiHandler;
+import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.network.NetworkThreadUtils;
 import net.minecraft.network.packet.c2s.play.RenameItemC2SPacket;
 import net.minecraft.network.packet.c2s.play.UpdateBeaconC2SPacket;
@@ -11,6 +12,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.util.Optional;
 
 @Mixin(ServerPlayNetworkHandler.class)
 public class ServerEventsMixin {
@@ -30,7 +33,9 @@ public class ServerEventsMixin {
         NetworkThreadUtils.forceMainThread(packet, (ServerPlayNetworkHandler)(Object)this,
                 this.player.getWorld());
         if (this.player.currentScreenHandler instanceof ServerGuiHandler handler) {
-            handler.gui.onBeaconChange(packet.getPrimaryEffectId(), packet.getSecondaryEffectId());
+            handler.gui.onBeaconChange(
+                    Optional.ofNullable(StatusEffect.byRawId(packet.getPrimaryEffectId())),
+                    Optional.ofNullable(StatusEffect.byRawId(packet.getSecondaryEffectId())));
         }
     }
 }

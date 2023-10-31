@@ -29,15 +29,19 @@ public class RemovableInvGUIItem implements InvGUIItem{
                 case THROW -> {
                     var decAmt = button==0 ? 1 : this.display.getMaxCount();
                     var newCount = Math.max(0,this.display.getCount()-decAmt);
-                    player.dropItem(this.display.copyWithCount(this.display.getCount()-newCount),true);
+
+                    var toDrop = this.display.copy();
+                    toDrop.decrement(newCount);
+                    player.dropItem(toDrop,true);
                     this.display.setCount(newCount);
                 }
                 case CLONE -> {
                     if(!player.isCreative()) break;
 
                     if(player.currentScreenHandler.getCursorStack().isEmpty()){
-                        player.currentScreenHandler.setCursorStack(
-                                this.display.copyWithCount(this.display.getMaxCount()));
+                        var toClone = this.display.copy();
+                        toClone.setCount(this.display.getMaxCount());
+                        player.currentScreenHandler.setCursorStack(toClone);
                     }
                 }
                 case QUICK_CRAFT -> {
@@ -78,11 +82,14 @@ public class RemovableInvGUIItem implements InvGUIItem{
                     }else if(button==1){
                         var playerStack = player.currentScreenHandler.getCursorStack();
                         if(playerStack.isEmpty()){
-                            player.currentScreenHandler.setCursorStack(
-                                    this.display.copyWithCount(this.display.getCount()-this.display.getCount()/2));
+                            var toPickup = this.display.copy();
+                            toPickup.setCount(this.display.getCount()-this.display.getCount()/2);
+                            player.currentScreenHandler.setCursorStack(toPickup);
                             this.display.setCount(this.display.getCount()/2);
                         }else if(this.display.isEmpty()){
-                            this.display=playerStack.copyWithCount(1);
+                            var toPlace = playerStack.copy();
+                            toPlace.setCount(1);
+                            this.display=toPlace;
                             playerStack.decrement(1);
                         }else if(ItemStack.canCombine(playerStack, this.display)){
                             if(this.display.getItem().getMaxCount()>=this.display.getCount()+1){

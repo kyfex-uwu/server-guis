@@ -2,6 +2,7 @@ package com.kyfexuwu.server_guis.mixin;
 
 import com.kyfexuwu.server_guis.ServerGuiHandler;
 import net.minecraft.network.NetworkThreadUtils;
+import net.minecraft.network.packet.c2s.play.ButtonClickC2SPacket;
 import net.minecraft.network.packet.c2s.play.RenameItemC2SPacket;
 import net.minecraft.network.packet.c2s.play.UpdateBeaconC2SPacket;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
@@ -31,6 +32,16 @@ public class ServerEventsMixin {
                 this.player.getServerWorld());
         if (this.player.currentScreenHandler instanceof ServerGuiHandler handler) {
             handler.gui.onBeaconChange(packet.getPrimaryEffectId(), packet.getSecondaryEffectId());
+        }
+    }
+
+    @Inject(method="onButtonClick", at=@At("HEAD"))
+    //this is needed because server does a bunch of checks to see if the gui is valid
+    public void onButtonClick__serverguis(ButtonClickC2SPacket packet, CallbackInfo ci) {
+        NetworkThreadUtils.forceMainThread(packet, (ServerPlayNetworkHandler)(Object)this,
+                this.player.getServerWorld());
+        if (this.player.currentScreenHandler instanceof ServerGuiHandler handler) {
+            handler.gui.onButtonClick(packet.getButtonId());
         }
     }
 }

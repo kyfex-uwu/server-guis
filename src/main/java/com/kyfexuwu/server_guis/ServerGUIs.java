@@ -3,6 +3,7 @@ package com.kyfexuwu.server_guis;
 import com.kyfexuwu.server_guis.consumers.ClickConsumer;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.minecraft.block.Blocks;
+import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -10,10 +11,12 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIntArray;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
+import net.minecraft.registry.Registries;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
+import net.minecraft.util.math.random.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +38,7 @@ public class ServerGUIs implements DedicatedServerModInitializer {
 		BREWING_STAND(ScreenHandlerType.BREWING_STAND,5, 2),
 		CARTOGRAPHY_TABLE(ScreenHandlerType.CARTOGRAPHY_TABLE, 3),
 		CRAFTING(ScreenHandlerType.CRAFTING, 10),
-		//ENCHANTMENT(ScreenHandlerType.ENCHANTMENT, 2, 10),
+		ENCHANTMENT(ScreenHandlerType.ENCHANTMENT, 2, 10),
 		FURNACE(ScreenHandlerType.FURNACE,3, 4),
 		GRINDSTONE(ScreenHandlerType.GRINDSTONE,3),
 		HOPPER(ScreenHandlerType.HOPPER,5),
@@ -91,6 +94,7 @@ public class ServerGUIs implements DedicatedServerModInitializer {
 		effect2.ifPresent(statusEffect ->
 				gui.propertyDelegate.set(2, StatusEffect.getRawId(statusEffect)));
 	}
+
 	public static void setFurnaceCookProgress(InvGUI<?> gui, double cookProgress){
 		checkGUIType(gui, "Tried to set cook data of gui "+gui+", but the gui is not a furnace type gui!",
 				ScreenType.FURNACE, ScreenType.BLAST_FURNACE, ScreenType.SMOKER);
@@ -107,6 +111,7 @@ public class ServerGUIs implements DedicatedServerModInitializer {
 		else if(fuelProgress>1) fuelProgress=1;
 		gui.propertyDelegate.set(0, (int) (1000*fuelProgress));
 	}
+
 	public static void setBrewingFuel(InvGUI<?> gui, int fuelAmt){
 		checkGUIType(gui, "Tried to set fuel of gui "+gui+", but the gui is not a brewing gui!",
 				ScreenType.BREWING_STAND);
@@ -119,12 +124,14 @@ public class ServerGUIs implements DedicatedServerModInitializer {
 
 		gui.propertyDelegate.set(0, time);
 	}
+
 	public static void setBannerPattern(InvGUI<?> gui, int pattern){
 		checkGUIType(gui, "Tried to set pattern of gui "+gui+", but the gui is not a loom gui!",
 				ScreenType.LOOM);
 
 		gui.propertyDelegate.set(0, pattern);
 	}
+
 	public static boolean handleBookPageTurning(InvGUI<?> gui, int buttonIndex){
 		checkGUIType(gui, "Tried to handle book pages of gui "+gui+", but the gui is not a lectern gui!",
 				ScreenType.LECTERN);
@@ -140,6 +147,89 @@ public class ServerGUIs implements DedicatedServerModInitializer {
 				ScreenType.LECTERN);
 
 		gui.propertyDelegate.set(0, pageIndex);
+	}
+
+	public static class EnchantmentData{
+		public int id;
+		public int level;
+		public int xpAmt;
+
+		private static final Random random = Random.create();
+		private static int calcRandomExperience(int slot){
+			return Math.min(30, Math.max(1,
+					(random.nextInt(8) + random.nextInt(16) + 8)*(slot+1)/3)); //clamps between 1 and 30
+		}
+
+		public EnchantmentData(int id, int level, int xpAmt){
+			this.id=id;
+			this.level=level;
+			this.xpAmt=xpAmt;
+		}
+
+		public static class EnchantmentDataBuilder{
+			private int id=-1;
+			private int level=1;
+			private int xpAmt=-1;
+			private EnchantmentDataBuilder(){}
+
+			public EnchantmentDataBuilder setEnchantmentId(int id){
+				if(id<0) return this;
+
+				this.id=id;
+				return this;
+			}
+			public EnchantmentDataBuilder setEnchantment(Enchantment enchantment){
+				this.id=Registries.ENCHANTMENT.getRawId(enchantment);
+				return this;
+			}
+
+			public EnchantmentDataBuilder setLevel(int level){
+				if(level<1) return this;
+
+				this.level=level;
+				return this;
+			}
+
+			public EnchantmentDataBuilder setXPAmt(int amt){
+				if(amt<0) return this;
+
+				this.xpAmt=amt;
+				return this;
+			}
+			public EnchantmentDataBuilder setRandomXPAmt(int slot){
+				this.xpAmt=calcRandomExperience(slot);
+				return this;
+			}
+
+			public EnchantmentData build(){
+				if(this.xpAmt==-1) this.xpAmt = calcRandomExperience(0);
+				return new EnchantmentData(this.id, this.level, this.xpAmt);
+			}
+		}
+		public static EnchantmentDataBuilder builder(){
+			return new EnchantmentDataBuilder();
+		}
+	}
+	public static void setEnchatingTableEnchantments(InvGUI<?> gui,
+		Optional<EnchantmentData> ench1, Optional<EnchantmentData> ench2, Optional<EnchantmentData> ench3){
+		checkGUIType(gui, "Tried to set enchanting data of gui "+gui+", but the gui is not an enchanting table gui!",
+				ScreenType.ENCHANTMENT);
+
+		ench1.ifPresent(data->{
+			gui.propertyDelegate.set(0, data.xpAmt);
+			gui.propertyDelegate.set(4, data.id);
+			gui.propertyDelegate.set(7, data.level);
+		});
+		ench2.ifPresent(data->{
+			gui.propertyDelegate.set(1, data.xpAmt);
+			gui.propertyDelegate.set(5, data.id);
+			gui.propertyDelegate.set(8, data.level);
+		});
+		ench3.ifPresent(data->{
+			gui.propertyDelegate.set(2, data.xpAmt);
+			gui.propertyDelegate.set(6, data.id);
+			gui.propertyDelegate.set(9, data.level);
+		});
 	}
 
 	@Override

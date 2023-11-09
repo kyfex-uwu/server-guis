@@ -18,53 +18,6 @@ import org.slf4j.LoggerFactory;
 
 public class ServerGUIs implements DedicatedServerModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger("Server GUIs");
-	public enum ScreenType{
-		GENERIC_9X1(ScreenHandlerType.GENERIC_9X1,9),
-		GENERIC_9X2(ScreenHandlerType.GENERIC_9X2,18),
-		GENERIC_9X3(ScreenHandlerType.GENERIC_9X3,27),
-		GENERIC_9X4(ScreenHandlerType.GENERIC_9X4,36),
-		GENERIC_9X5(ScreenHandlerType.GENERIC_9X5,45),
-		GENERIC_9X6(ScreenHandlerType.GENERIC_9X6,54),
-		GENERIC_3X3(ScreenHandlerType.GENERIC_3X3,9),
-		ANVIL(ScreenHandlerType.ANVIL,3),
-		BEACON(ScreenHandlerType.BEACON,1, 3),
-		BLAST_FURNACE(ScreenHandlerType.BLAST_FURNACE,3, 4),
-		BREWING_STAND(ScreenHandlerType.BREWING_STAND,5, 2),
-		CARTOGRAPHY_TABLE(ScreenHandlerType.CARTOGRAPHY_TABLE, 3),
-		CRAFTING(ScreenHandlerType.CRAFTING, 10),
-		ENCHANTMENT(ScreenHandlerType.ENCHANTMENT, 2, 10),
-		FURNACE(ScreenHandlerType.FURNACE,3, 4),
-		GRINDSTONE(ScreenHandlerType.GRINDSTONE,3),
-		HOPPER(ScreenHandlerType.HOPPER,5),
-		LECTERN(ScreenHandlerType.LECTERN, 1, 1), //for books
-		//LEGACY_SMITHING(ScreenHandlerType.LEGACY_SMITHING), //pre 1.19? maybe?
-		LOOM(ScreenHandlerType.LOOM, 4, 1),//make sure banner slot is banner, and dye slot is dye
-		//MERCHANT(ScreenHandlerType.MERCHANT, 3),
-		SMITHING(ScreenHandlerType.SMITHING,4),
-		SMOKER(ScreenHandlerType.SMOKER,3, 4),
-		STONECUTTER(ScreenHandlerType.STONECUTTER, 2, 1);
-
-		//book (edit?)
-		//command block
-		//creative inventory
-		//sign edit
-		//horse
-		//inventory?
-		//jigsaw
-		//structure block
-
-		public final ScreenHandlerType<?> type;
-		public final int slotCount;
-		public final int propCount;
-		ScreenType(ScreenHandlerType<?> type, int slotCount){
-			this(type, slotCount, 0);
-		}
-		ScreenType(ScreenHandlerType<?> type, int slotCount, int propCount){
-			this.type=type;
-			this.slotCount=slotCount;
-			this.propCount=propCount;
-		}
-	}
 
 	@Override
 	public void onInitializeServer() {
@@ -91,6 +44,59 @@ public class ServerGUIs implements DedicatedServerModInitializer {
 		@Override
 		public ClickConsumer<?> onClick() { return nothingClickInst; }
 	};
+
+	public enum ScreenType{
+		GENERIC_9X1(ScreenHandlerType.GENERIC_9X1,9),
+		GENERIC_9X2(ScreenHandlerType.GENERIC_9X2,18),
+		GENERIC_9X3(ScreenHandlerType.GENERIC_9X3,27),
+		GENERIC_9X4(ScreenHandlerType.GENERIC_9X4,36),
+		GENERIC_9X5(ScreenHandlerType.GENERIC_9X5,45),
+		GENERIC_9X6(ScreenHandlerType.GENERIC_9X6,54),
+		GENERIC_3X3(ScreenHandlerType.GENERIC_3X3,9),
+		ANVIL(ScreenHandlerType.ANVIL,3),
+		BEACON(ScreenHandlerType.BEACON,1, 3),
+		BLAST_FURNACE(ScreenHandlerType.BLAST_FURNACE,3, 4),
+		BREWING_STAND(ScreenHandlerType.BREWING_STAND,5, 2),
+		CARTOGRAPHY_TABLE(ScreenHandlerType.CARTOGRAPHY_TABLE, 3),
+		CRAFTING(ScreenHandlerType.CRAFTING, 10),
+		ENCHANTMENT(ScreenHandlerType.ENCHANTMENT, 2, 10),
+		FURNACE(ScreenHandlerType.FURNACE,3, 4),
+		GRINDSTONE(ScreenHandlerType.GRINDSTONE,3),
+		HOPPER(ScreenHandlerType.HOPPER,5),
+		LECTERN(ScreenHandlerType.LECTERN, 1, 1), //for books
+		//LEGACY_SMITHING(ScreenHandlerType.LEGACY_SMITHING), //pre 1.19? maybe?
+		LOOM(ScreenHandlerType.LOOM, 4, 1),//make sure banner slot is banner, and dye slot is dye (triggered by click, or does this remote crash?)
+		MERCHANT(ScreenHandlerType.MERCHANT, 3),
+		SMITHING(ScreenHandlerType.SMITHING,4),
+		SMOKER(ScreenHandlerType.SMOKER,3, 4),
+		STONECUTTER(ScreenHandlerType.STONECUTTER, 2, 1);
+
+		//book (edit?)
+		//command block
+		//creative inventory
+		//sign edit
+		//horse
+		//inventory?
+		//jigsaw
+		//structure block
+
+		//make a proper villager trade gui
+
+		//cartography, maybe make image viewer
+		//set recipe data? look into onSynchronizeRecipes
+
+		public final ScreenHandlerType<?> type;
+		public final int slotCount;
+		public final int propCount;
+		ScreenType(ScreenHandlerType<?> type, int slotCount){
+			this(type, slotCount, 0);
+		}
+		ScreenType(ScreenHandlerType<?> type, int slotCount, int propCount){
+			this.type=type;
+			this.slotCount=slotCount;
+			this.propCount=propCount;
+		}
+	}
 
 	public static ItemStack getPlayerHead(int i1, int i2, int i3, int i4, String textureString){
 		var val = new NbtCompound();

@@ -9,6 +9,7 @@ import net.minecraft.screen.*;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 
+import java.util.HashMap;
 import java.util.Optional;
 
 public class InvGUI<T> {
@@ -125,7 +126,7 @@ public class InvGUI<T> {
                 property, value);
     }
     public void onAnvilType(String newText){
-        this.anvilText=newText;
+        this.setData("builtin.anvilText", newText);
         this.onAnvilType.consume(this.handler.player,
                 this, ServerGuiHandler.appeaseCompiler(this.handler.argument),
                 newText);
@@ -173,8 +174,14 @@ public class InvGUI<T> {
         });
     }
 
-    private String anvilText="";
-    public String getAnvilText(){
-        return anvilText;
+    private final HashMap<String, Object> data = new HashMap<>();
+    public Object getData(String name){
+        return this.data.getOrDefault(name, null);
+    }
+    public <T> T getDataOfType(String name, Class<T> clazz){
+        return (T) this.data.getOrDefault(name, null);
+    }
+    public void setData(String name, Object data){
+        this.data.put(name, data);
     }
 }

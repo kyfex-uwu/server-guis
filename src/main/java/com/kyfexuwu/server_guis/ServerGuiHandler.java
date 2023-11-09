@@ -41,7 +41,7 @@ public class ServerGuiHandler extends ScreenHandler {
 
         this.argument = argument;
 
-        this.inventory = new SimpleInventory(type.slotCount +36);
+        this.inventory = new SimpleInventory(type.slotCount+36);
         this.inventory.onOpen(playerInventory.player);
 
         this.player = (ServerPlayerEntity) playerInventory.player;

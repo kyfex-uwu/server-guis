@@ -3,7 +3,6 @@ package com.kyfexuwu.server_guis;
 import com.kyfexuwu.server_guis.consumers.ClickConsumer;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.minecraft.block.Blocks;
-import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
@@ -11,16 +10,39 @@ import net.minecraft.nbt.NbtIntArray;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.screen.ScreenHandlerType;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Optional;
-
 public class ServerGUIs implements DedicatedServerModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger("Server GUIs");
+
+	@Override
+	public void onInitializeServer() {
+		//if(FoxEntity.class.getSimpleName().equals("FoxEntity")) Testing.test();
+		LOGGER.info("Server GUIs loaded!");
+	}
+
+	public static ClickConsumer<?> nothingClick(){ return (_1, _2, _3, _4, _5, _6)->{}; }
+	private static final ClickConsumer<?> nothingClickInst = nothingClick();
+	public static final InvGUIItem IMMOVABLE = new InvGUIItem() {
+		private static final ItemStack item = Items.BLACK_STAINED_GLASS_PANE.getDefaultStack().setCustomName(Text.of("§f"));
+
+		@Override
+		public ItemStack getItem(ServerPlayerEntity player, InvGUI<?> gui, Object argument) { return item; }
+		@Override
+		public ClickConsumer<?> onClick() { return nothingClickInst; }
+	};
+	public static final InvGUIItem EMPTY = new InvGUIItem() {
+		@Override
+		public ItemStack getItem(ServerPlayerEntity player, InvGUI<?> gui, Object argument) {
+			return ItemStack.EMPTY;
+		}
+
+		@Override
+		public ClickConsumer<?> onClick() { return nothingClickInst; }
+	};
 	public enum ScreenType{
 		GENERIC_9X1(ScreenHandlerType.GENERIC_9X1,9),
 		GENERIC_9X2(ScreenHandlerType.GENERIC_9X2,18),
@@ -35,15 +57,15 @@ public class ServerGUIs implements DedicatedServerModInitializer {
 		BREWING_STAND(ScreenHandlerType.BREWING_STAND,5, 2),
 		CARTOGRAPHY_TABLE(ScreenHandlerType.CARTOGRAPHY_TABLE, 3),
 		CRAFTING(ScreenHandlerType.CRAFTING, 10),
-		//ENCHANTMENT(ScreenHandlerType.ENCHANTMENT, 2, 10),
+		ENCHANTMENT(ScreenHandlerType.ENCHANTMENT, 2, 10),
 		FURNACE(ScreenHandlerType.FURNACE,3, 4),
 		GRINDSTONE(ScreenHandlerType.GRINDSTONE,3),
 		HOPPER(ScreenHandlerType.HOPPER,5),
 		LECTERN(ScreenHandlerType.LECTERN, 1, 1), //for books
-		//LEGACY_SMITHING(ScreenHandlerType.LEGACY_SMITHING), //pre 1.19? maybe?
+		LEGACY_SMITHING(ScreenHandlerType.SMITHING, 3),
 		LOOM(ScreenHandlerType.LOOM, 4, 1),//make sure banner slot is banner, and dye slot is dye
-		//MERCHANT(ScreenHandlerType.MERCHANT, 3),
-		SMITHING(ScreenHandlerType.SMITHING,4),
+		MERCHANT(ScreenHandlerType.MERCHANT, 3),
+		//FUTURE_SMITHING
 		SMOKER(ScreenHandlerType.SMOKER,3, 4),
 		STONECUTTER(ScreenHandlerType.STONECUTTER, 2, 1);
 
@@ -68,105 +90,6 @@ public class ServerGUIs implements DedicatedServerModInitializer {
 			this.propCount=propCount;
 		}
 	}
-
-	private static void checkGUIType(InvGUI<?> gui, String errorMessage, ScreenType... types){
-		for(var type : types){
-			if(gui.type==type) return;
-		}
-		throw new IllegalArgumentException(errorMessage);
-	}
-
-	public static void setBeaconLevel(InvGUI<?> gui, int level){
-		checkGUIType(gui, "Tried to set beacon level of gui "+gui+", but the gui is not a beacon gui!",
-				ScreenType.BEACON);
-
-		gui.propertyDelegate.set(0,level);
-	}
-	public static void setBeaconEffects(InvGUI<?> gui, Optional<StatusEffect> effect1, Optional<StatusEffect> effect2){
-		checkGUIType(gui, "Tried to set status effects of gui "+gui+", but the gui is not a beacon gui!",
-				ScreenType.BEACON);
-
-		effect1.ifPresent(statusEffect ->
-				gui.propertyDelegate.set(1, StatusEffect.getRawId(statusEffect)));
-		effect2.ifPresent(statusEffect ->
-				gui.propertyDelegate.set(2, StatusEffect.getRawId(statusEffect)));
-	}
-	public static void setFurnaceCookProgress(InvGUI<?> gui, double cookProgress){
-		checkGUIType(gui, "Tried to set cook data of gui "+gui+", but the gui is not a furnace type gui!",
-				ScreenType.FURNACE, ScreenType.BLAST_FURNACE, ScreenType.SMOKER);
-
-		if(cookProgress<0) cookProgress=0;
-		else if(cookProgress>1) cookProgress=1;
-		gui.propertyDelegate.set(2, (int) (1000*cookProgress));
-	}
-	public static void setFurnaceFuelProgress(InvGUI<?> gui, double fuelProgress){
-		checkGUIType(gui, "Tried to set fuel data of gui "+gui+", but the gui is not a furnace type gui!",
-				ScreenType.FURNACE, ScreenType.BLAST_FURNACE, ScreenType.SMOKER);
-
-		if(fuelProgress<0) fuelProgress=0;
-		else if(fuelProgress>1) fuelProgress=1;
-		gui.propertyDelegate.set(0, (int) (1000*fuelProgress));
-	}
-	public static void setBrewingFuel(InvGUI<?> gui, int fuelAmt){
-		checkGUIType(gui, "Tried to set fuel of gui "+gui+", but the gui is not a brewing gui!",
-				ScreenType.BREWING_STAND);
-
-		gui.propertyDelegate.set(1, fuelAmt);
-	}
-	public static void setBrewingTime(InvGUI<?> gui, int time){
-		checkGUIType(gui, "Tried to set time of gui "+gui+", but the gui is not a brewing gui!",
-				ScreenType.BREWING_STAND);
-
-		gui.propertyDelegate.set(0, time);
-	}
-	public static void setBannerPattern(InvGUI<?> gui, int pattern){
-		checkGUIType(gui, "Tried to set pattern of gui "+gui+", but the gui is not a loom gui!",
-				ScreenType.LOOM);
-
-		gui.propertyDelegate.set(0, pattern);
-	}
-	public static boolean handleBookPageTurning(InvGUI<?> gui, int buttonIndex){
-		checkGUIType(gui, "Tried to handle book pages of gui "+gui+", but the gui is not a lectern gui!",
-				ScreenType.LECTERN);
-
-		if(buttonIndex==1||buttonIndex==2){
-			gui.propertyDelegate.set(0, gui.propertyDelegate.get(0)-3+buttonIndex*2);
-			return true;
-		}
-		return false;
-	}
-	public static void setBookPage(InvGUI<?> gui, int pageIndex){
-		checkGUIType(gui, "Tried to set page of gui "+gui+", but the gui is not a lectern gui!",
-				ScreenType.LECTERN);
-
-		gui.propertyDelegate.set(0, pageIndex);
-	}
-
-	@Override
-	public void onInitializeServer() {
-		//if(MinecraftServer.class.getSimpleName().equals("MinecraftServer")) Testing.test();
-		LOGGER.info("Server GUIs loaded!");
-	}
-
-	public static ClickConsumer<?> nothingClick(){ return (_1, _2, _3, _4, _5, _6)->{}; }
-	private static final ClickConsumer<?> nothingClickInst = nothingClick();
-	public static final InvGUIItem IMMOVABLE = new InvGUIItem() {
-		private static final ItemStack item = Items.BLACK_STAINED_GLASS_PANE.getDefaultStack().setCustomName(Text.of("§f"));
-
-		@Override
-		public ItemStack getItem(ServerPlayerEntity player, InvGUI<?> gui, Object argument) { return item; }
-		@Override
-		public ClickConsumer<?> onClick() { return nothingClickInst; }
-	};
-	public static final InvGUIItem EMPTY = new InvGUIItem() {
-		@Override
-		public ItemStack getItem(ServerPlayerEntity player, InvGUI<?> gui, Object argument) {
-			return ItemStack.EMPTY;
-		}
-
-		@Override
-		public ClickConsumer<?> onClick() { return nothingClickInst; }
-	};
 
 	public static ItemStack getPlayerHead(int i1, int i2, int i3, int i4, String textureString){
 		var val = new NbtCompound();

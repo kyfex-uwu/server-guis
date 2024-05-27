@@ -3,6 +3,7 @@ package com.kyfexuwu.server_guis.mixin;
 import com.kyfexuwu.server_guis.ServerGuiHandler;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.network.NetworkThreadUtils;
+import net.minecraft.network.packet.c2s.play.ButtonClickC2SPacket;
 import net.minecraft.network.packet.c2s.play.RenameItemC2SPacket;
 import net.minecraft.network.packet.c2s.play.UpdateBeaconC2SPacket;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
@@ -19,16 +20,17 @@ import java.util.Optional;
 public class ServerEventsMixin {
     @Shadow public ServerPlayerEntity player;
 
-    @Inject(method="onRenameItem",at=@At("HEAD"))
+    @Inject(method="onRenameItem",at=@At("HEAD"), cancellable = true)
     public void onRenameItem__serverguis(RenameItemC2SPacket packet, CallbackInfo ci) {
         NetworkThreadUtils.forceMainThread(packet, (ServerPlayNetworkHandler)(Object)this,
                 this.player.getWorld());
         if (this.player.currentScreenHandler instanceof ServerGuiHandler handler) {
             handler.gui.onAnvilType(packet.getName());
+            ci.cancel();
         }
     }
 
-    @Inject(method="onUpdateBeacon",at=@At("HEAD"))
+    @Inject(method="onUpdateBeacon",at=@At("HEAD"), cancellable = true)
     public void onUpdateBeacon__serverguis(UpdateBeaconC2SPacket packet, CallbackInfo ci) {
         NetworkThreadUtils.forceMainThread(packet, (ServerPlayNetworkHandler)(Object)this,
                 this.player.getWorld());
@@ -36,6 +38,18 @@ public class ServerEventsMixin {
             handler.gui.onBeaconChange(
                     Optional.ofNullable(StatusEffect.byRawId(packet.getPrimaryEffectId())),
                     Optional.ofNullable(StatusEffect.byRawId(packet.getSecondaryEffectId())));
+            ci.cancel();
+        }
+    }
+
+    @Inject(method="onButtonClick", at=@At("HEAD"), cancellable = true)
+    //this is needed because server does a bunch of checks to see if the gui is valid
+    public void onButtonClick__serverguis(ButtonClickC2SPacket packet, CallbackInfo ci) {
+        NetworkThreadUtils.forceMainThread(packet, (ServerPlayNetworkHandler)(Object)this,
+                this.player.getWorld());
+        if (this.player.currentScreenHandler instanceof ServerGuiHandler handler) {
+            handler.gui.onButtonClick(packet.getButtonId());
+            ci.cancel();
         }
     }
 }

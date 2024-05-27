@@ -81,7 +81,7 @@ public class ServerGuiHandler extends ScreenHandler {
     }
 
     @Override
-    public ItemStack quickMove(PlayerEntity player, int slot) {
+    public ItemStack transferSlot(PlayerEntity player, int slot) {
         if(!this.isGuiSlot(slot)){
             //quickmove from player to gui, slot is always greater than this.type.slotCount
 

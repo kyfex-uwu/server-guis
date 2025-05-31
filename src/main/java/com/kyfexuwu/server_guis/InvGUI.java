@@ -204,8 +204,8 @@ public class InvGUI<T> {
         return this.data.getOrDefault(name, null);
     }
 
-    public <T> T getDataOfType(String name, Class<T> clazz) {
-        return (T) this.data.getOrDefault(name, null);
+    public <T2> T2 getDataOfType(String name, Class<T2> clazz) {
+        return (T2) this.data.getOrDefault(name, null);
     }
 
     public void setData(String name, Object data) {

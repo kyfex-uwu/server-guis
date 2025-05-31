@@ -214,6 +214,7 @@ public class PropertyHelpers {
         gui.getHandler().player.networkHandler.sendPacket(toSend);
     }
 
+    //todo: look into this, why does it always return true
     public static boolean handleTradeButtons(InvGUI<?> gui, int buttonIndex) {
         checkGUIType(gui, "Tried to handle trade buttons of gui " + gui + ", but the gui is not a merchant gui!",
                 ServerGUIs.ScreenType.MERCHANT);

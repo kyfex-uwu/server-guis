@@ -1,19 +1,24 @@
 package com.kyfexuwu.server_guis;
 
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.WrittenBookContentComponent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtInt;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
+import net.minecraft.server.filter.FilteredMessage;
+import net.minecraft.text.RawFilteredPair;
 import net.minecraft.text.Text;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 public class WrittenBookFactory {
     private final String title;
     private final String author;
-    private Integer generation;
+    private int generation;
     private final ArrayList<Text> pageTexts = new ArrayList<>();
     public WrittenBookFactory(String title, String author){
         this.title=title;
@@ -21,7 +26,7 @@ public class WrittenBookFactory {
     }
     public WrittenBookFactory(String title, String author, Integer generation){
         this(title, author);
-        this.generation=generation;
+        this.generation=generation==null?0:generation;
     }
     public WrittenBookFactory appendPage(Text page){
         this.pageTexts.add(page);
@@ -30,20 +35,14 @@ public class WrittenBookFactory {
 
     public ItemStack build(){
         var toReturn = Items.WRITTEN_BOOK.getDefaultStack();
-        var compound = new NbtCompound();
-
-        compound.put("title",NbtString.of(this.title));
-        compound.put("author",NbtString.of(this.author));
-        if(this.generation!=null)
-            compound.put("generation", NbtInt.of(this.generation));
-
-        var pages = new NbtList();
-        for(var page : this.pageTexts){
-            pages.add(NbtString.of(Text.Serializer.toJson(page)));
-        }
-
-        compound.put("pages", pages);
-        toReturn.setNbt(compound);
+        toReturn.set(DataComponentTypes.WRITTEN_BOOK_CONTENT, new WrittenBookContentComponent(
+                RawFilteredPair.of(FilteredMessage.permitted(this.title)),
+                this.author,
+                this.generation,
+                this.pageTexts.stream().map(text ->
+                        new RawFilteredPair<>(text, Optional.of(text))).toList(),
+                true
+        ));
         return toReturn;
     }
 }

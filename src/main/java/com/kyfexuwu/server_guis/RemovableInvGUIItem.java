@@ -1,6 +1,7 @@
 package com.kyfexuwu.server_guis;
 
 import com.kyfexuwu.server_guis.consumers.ClickConsumer;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -33,7 +34,7 @@ public class RemovableInvGUIItem implements InvGUIItem{
                         var playerStack = player.getOffHandStack();
                         if(!playerStack.isEmpty()&&!this.canInsert) break;
 
-                        player.getInventory().offHand.set(0,this.display);
+                        player.equipStack(EquipmentSlot.OFFHAND, this.display);
                         this.display=playerStack;
                     }else{
                         var playerStack = player.currentScreenHandler.getSlot(slot).getStack();
@@ -70,7 +71,7 @@ public class RemovableInvGUIItem implements InvGUIItem{
                         for(var slot : thisInv.getHandler().slots){
                             var stack = slot.getStack();
                             if(!slot.canTakeItems(player)||
-                                    !ItemStack.canCombine(playerStack, stack)) continue;
+                                    !ItemStack.areItemsAndComponentsEqual(playerStack, stack)) continue;
 
                             var nextNewCount=Math.min(maxCount, newCount+stack.getCount());
                             stack.decrement(nextNewCount-newCount);
@@ -84,7 +85,7 @@ public class RemovableInvGUIItem implements InvGUIItem{
                     if(button==0){
                         var playerStack = player.currentScreenHandler.getCursorStack();
 
-                        if(playerStack.isEmpty() || !ItemStack.canCombine(playerStack, this.display)){
+                        if(playerStack.isEmpty() || !ItemStack.areItemsAndComponentsEqual(playerStack, this.display)){
                             if(!this.canRemove&&!this.display.isEmpty()) break;
                             if(!this.canInsert&&!playerStack.isEmpty()) break;
 
@@ -112,7 +113,7 @@ public class RemovableInvGUIItem implements InvGUIItem{
 
                             this.display=playerStack.copyWithCount(1);
                             playerStack.decrement(1);
-                        }else if(ItemStack.canCombine(playerStack, this.display)){
+                        }else if(ItemStack.areItemsAndComponentsEqual(playerStack, this.display)){
                             if(this.display.getItem().getMaxCount()>=this.display.getCount()+1&&this.canInsert){
                                 this.display.setCount(this.display.getCount()+1);
                                 playerStack.decrement(1);

@@ -92,7 +92,7 @@ public class ServerGuiHandler extends ScreenHandler {
 
                 var insertInto = this.inventory.getStack(i);
                 if(this.gui.items[i] instanceof RemovableInvGUIItem invGUIItem &&
-                        (ItemStack.canCombine(stack, insertInto)||insertInto.isEmpty())){
+                        (ItemStack.areItemsAndComponentsEqual(stack, insertInto)||insertInto.isEmpty())){
                     var moveAmt = Math.min(insertInto.getMaxCount()-insertInto.getCount(),stack.getCount());
                     invGUIItem.display=stack.copyWithCount(moveAmt+invGUIItem.display.getCount());
                     stack.decrement(moveAmt);
@@ -145,10 +145,7 @@ public class ServerGuiHandler extends ScreenHandler {
             var item1 = this.gui.items[i].getItem(this.player, this.gui, this.argument);
             var item2 = this.inventory.getStack(i);
 
-            if(!ItemStack.areItemsEqual(item1,item2) || (
-                    item1.hasNbt()?
-                            !item1.getNbt().equals(item2.getNbt()):
-                            !item2.hasNbt())) {
+            if(!ItemStack.areItemsAndComponentsEqual(item1,item2)) {
                 this.setStackInSlot(i, 0, item1);
             }
         }

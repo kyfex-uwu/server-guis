@@ -1,8 +1,14 @@
 package com.kyfexuwu.server_guis;
 
 import com.kyfexuwu.server_guis.consumers.ClickConsumer;
+import com.mojang.authlib.properties.Property;
+import com.mojang.authlib.properties.PropertyMap;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.SkullBlock;
+import net.minecraft.component.ComponentType;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.ProfileComponent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
@@ -16,6 +22,9 @@ import net.minecraft.text.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Optional;
+import java.util.UUID;
+
 public class ServerGUIs implements DedicatedServerModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger("Server GUIs");
 
@@ -28,7 +37,8 @@ public class ServerGUIs implements DedicatedServerModInitializer {
 	public static ClickConsumer<?> nothingClick(){ return (_1, _2, _3, _4, _5, _6)->{}; }
 	private static final ClickConsumer<?> nothingClickInst = nothingClick();
 	public static final InvGUIItem IMMOVABLE = new InvGUIItem() {
-		private static final ItemStack item = Items.BLACK_STAINED_GLASS_PANE.getDefaultStack().setCustomName(Text.of("§f"));
+		private static final ItemStack item = Items.BLACK_STAINED_GLASS_PANE.getDefaultStack();
+		{ item.set(DataComponentTypes.CUSTOM_NAME, Text.of("§f")); }
 
 		@Override
 		public ItemStack getItem(ServerPlayerEntity player, InvGUI<?> gui, Object argument) { return item; }
@@ -58,13 +68,13 @@ public class ServerGUIs implements DedicatedServerModInitializer {
 		BLAST_FURNACE(ScreenHandlerType.BLAST_FURNACE,3, 4),
 		BREWING_STAND(ScreenHandlerType.BREWING_STAND,5, 2),
 		CARTOGRAPHY_TABLE(ScreenHandlerType.CARTOGRAPHY_TABLE, 3),
+		CRAFTER_3X3(ScreenHandlerType.CRAFTER_3X3,10),
 		CRAFTING(ScreenHandlerType.CRAFTING, 10),
 		ENCHANTMENT(ScreenHandlerType.ENCHANTMENT, 2, 10),
 		FURNACE(ScreenHandlerType.FURNACE,3, 4),
 		GRINDSTONE(ScreenHandlerType.GRINDSTONE,3),
 		HOPPER(ScreenHandlerType.HOPPER,5),
 		LECTERN(ScreenHandlerType.LECTERN, 1, 1), //for books
-		//LEGACY_SMITHING(ScreenHandlerType.LEGACY_SMITHING), //pre 1.19? maybe?
 		LOOM(ScreenHandlerType.LOOM, 4, 1),//make sure banner slot is banner, and dye slot is dye (triggered by click, or does this remote crash?)
 		MERCHANT(ScreenHandlerType.MERCHANT, 3),
 		SMITHING(ScreenHandlerType.SMITHING,4),
@@ -98,31 +108,31 @@ public class ServerGUIs implements DedicatedServerModInitializer {
 		}
 	}
 
-	public static ItemStack getPlayerHead(int i1, int i2, int i3, int i4, String textureString){
-		var val = new NbtCompound();
-		val.putString("Value", textureString);
-		var textures = new NbtList();
-		textures.add(0, val);
-		var props = new NbtCompound();
-		props.put("textures", textures);
-
-		var nbt = new NbtCompound();
-		nbt.put("Id",new NbtIntArray(new int[]{i1, i2, i3, i4}));
-		nbt.put("Properties",props);
-
-		var finalCompound = new NbtCompound();
-		finalCompound.put("SkullOwner",nbt);
-
+	public static ItemStack getPlayerHead(UUID uuid){
 		var head = new ItemStack(Blocks.PLAYER_HEAD);
-		head.setNbt(finalCompound);
+		head.set(DataComponentTypes.PROFILE, new ProfileComponent(
+				Optional.empty(),
+				Optional.of(uuid),
+				new PropertyMap()
+		));
+		return head;
+	}
+	public static ItemStack getTexturedHead(String texture){
+		var head = new ItemStack(Blocks.PLAYER_HEAD);
+		var map = new PropertyMap();
+		map.put("textures", new Property("textures", texture));
+		head.set(DataComponentTypes.PROFILE, new ProfileComponent(
+				Optional.empty(),
+				Optional.empty(),
+				map));
 		return head;
 	}
 	public static ItemStack getPlayerHead(String username){
-		var finalCompound = new NbtCompound();
-		finalCompound.put("SkullOwner", NbtString.of(username));
-
 		var head = new ItemStack(Blocks.PLAYER_HEAD);
-		head.setNbt(finalCompound);
+		head.set(DataComponentTypes.PROFILE, new ProfileComponent(
+				Optional.of(username),
+				Optional.empty(),
+				new PropertyMap()));
 		return head;
 	}
 }

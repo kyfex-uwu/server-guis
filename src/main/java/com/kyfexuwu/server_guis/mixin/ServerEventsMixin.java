@@ -5,6 +5,8 @@ import net.minecraft.network.NetworkThreadUtils;
 import net.minecraft.network.packet.c2s.play.ButtonClickC2SPacket;
 import net.minecraft.network.packet.c2s.play.RenameItemC2SPacket;
 import net.minecraft.network.packet.c2s.play.UpdateBeaconC2SPacket;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.spongepowered.asm.mixin.Mixin;
@@ -32,7 +34,9 @@ public class ServerEventsMixin {
         NetworkThreadUtils.forceMainThread(packet, (ServerPlayNetworkHandler)(Object)this,
                 this.player.getServerWorld());
         if (this.player.currentScreenHandler instanceof ServerGuiHandler handler) {
-            handler.gui.onBeaconChange(packet.getPrimaryEffectId(), packet.getSecondaryEffectId());
+            handler.gui.onBeaconChange(
+                    packet.primary().map(RegistryEntry::value),
+                    packet.secondary().map(RegistryEntry::value));
             ci.cancel();
         }
     }
@@ -43,7 +47,7 @@ public class ServerEventsMixin {
         NetworkThreadUtils.forceMainThread(packet, (ServerPlayNetworkHandler)(Object)this,
                 this.player.getServerWorld());
         if (this.player.currentScreenHandler instanceof ServerGuiHandler handler) {
-            handler.gui.onButtonClick(packet.getButtonId());
+            handler.gui.onButtonClick(packet.buttonId());
             ci.cancel();
         }
     }

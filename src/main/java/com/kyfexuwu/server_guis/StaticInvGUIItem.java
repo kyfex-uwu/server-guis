@@ -1,6 +1,7 @@
 package com.kyfexuwu.server_guis;
 
 import com.kyfexuwu.server_guis.consumers.ClickConsumer;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -11,7 +12,8 @@ public class StaticInvGUIItem implements InvGUIItem{
     private final ClickConsumer<?> clickConsumer;
 
     public StaticInvGUIItem(ItemConvertible display, Text name, int count, ClickConsumer<?> clickConsumer){
-        var d = display.asItem().getDefaultStack().setCustomName(name);
+        var d = display.asItem().getDefaultStack();
+        d.set(DataComponentTypes.CUSTOM_NAME, name);
         d.setCount(count);
         this.display=d;
         this.clickConsumer=clickConsumer;

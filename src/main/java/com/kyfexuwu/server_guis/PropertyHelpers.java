@@ -1,5 +1,6 @@
 package com.kyfexuwu.server_guis;
 
+import net.minecraft.client.gui.screen.ingame.EnchantmentScreen;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.item.ItemStack;
@@ -8,10 +9,21 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.network.packet.s2c.play.SetTradeOffersS2CPacket;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.screen.EnchantmentScreenHandler;
+import net.minecraft.server.Main;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.collection.IndexedIterable;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.village.TradeOffer;
 import net.minecraft.village.TradeOfferList;
+import net.minecraft.world.World;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 public class PropertyHelpers {
@@ -37,9 +49,9 @@ public class PropertyHelpers {
                 ServerGUIs.ScreenType.BEACON);
 
         effect1.ifPresent(statusEffect ->
-                gui.propertyDelegate.set(1, StatusEffect.getRawId(statusEffect)));
+                gui.propertyDelegate.set(1, Registries.STATUS_EFFECT.getRawId(statusEffect)));
         effect2.ifPresent(statusEffect ->
-                gui.propertyDelegate.set(2, StatusEffect.getRawId(statusEffect)));
+                gui.propertyDelegate.set(2, Registries.STATUS_EFFECT.getRawId(statusEffect)));
     }
 
     public static void setFurnaceCookProgress(InvGUI<?> gui, double cookProgress){
@@ -125,8 +137,15 @@ public class PropertyHelpers {
                 this.id=id;
                 return this;
             }
-            public EnchantmentDataBuilder setEnchantment(Enchantment enchantment){
-                this.id= Registries.ENCHANTMENT.getRawId(enchantment);
+            public EnchantmentDataBuilder setEnchantment(Enchantment enchantment, World world){
+                IndexedIterable<RegistryEntry<Enchantment>> indexedIterable = world.getRegistryManager().getOrThrow(RegistryKeys.ENCHANTMENT).getIndexedEntries();
+                this.id=-1;
+                for(int i=0;i< indexedIterable.size();i++){
+                    if(indexedIterable.get(i).value().equals(enchantment)){
+                        this.id=i;
+                        break;
+                    }
+                }
                 return this;
             }
 
@@ -220,7 +239,7 @@ public class PropertyHelpers {
 
                 for(int i=0;i<36;i++){
                     currStack=handler.inventory.getStack(handler.type.slotCount+i);
-                    if(ItemStack.canCombine(currStack, toInsert)){
+                    if(ItemStack.areItemsAndComponentsEqual(currStack, toInsert)){
                         addVals[i]=Math.min(currStack.getMaxCount()-currStack.getCount(),insertAmt);
                         insertAmt-=addVals[i];
 
@@ -232,12 +251,12 @@ public class PropertyHelpers {
                     handler.inventory.getStack(handler.type.slotCount+i).increment(addVals[i]);
             }
 
-            ItemStack toTake1 = trades.get(buttonIndex).getAdjustedFirstBuyItem();
+            ItemStack toTake1 = trades.get(buttonIndex).getDisplayedFirstBuyItem();
             int toTakeC1 = handler.player.getInventory().remove(stack->stack.isOf(toTake1.getItem()),
                     toTake1.getCount(), handler.player.getInventory());
             ((RemovableInvGUIItem) handler.gui.items[0]).display = toTake1.copyWithCount(toTakeC1);
 
-            ItemStack toTake2 = trades.get(buttonIndex).getSecondBuyItem();
+            ItemStack toTake2 = trades.get(buttonIndex).getDisplayedSecondBuyItem();
             int toTakeC2 = handler.player.getInventory().remove(stack->stack.isOf(toTake2.getItem()),
                     toTake2.getCount(), handler.player.getInventory());
             ((RemovableInvGUIItem) handler.gui.items[1]).display = toTake1.copyWithCount(toTakeC2);
@@ -271,12 +290,12 @@ public class PropertyHelpers {
                 var trade = gui.getDataOfType("builtin.merchantTrade", TradeOffer.class);
                 if(trade==null) return;
 
-                if(((RemovableInvGUIItem) gui.items[0]).display.isOf(trade.getAdjustedFirstBuyItem().getItem())) {
-                    ((RemovableInvGUIItem) gui.items[0]).display.decrement(trade.getAdjustedFirstBuyItem().getCount());
-                    ((RemovableInvGUIItem) gui.items[1]).display.decrement(trade.getSecondBuyItem().getCount());
+                if(((RemovableInvGUIItem) gui.items[0]).display.isOf(trade.getDisplayedFirstBuyItem().getItem())) {
+                    ((RemovableInvGUIItem) gui.items[0]).display.decrement(trade.getDisplayedFirstBuyItem().getCount());
+                    ((RemovableInvGUIItem) gui.items[1]).display.decrement(trade.getDisplayedSecondBuyItem().getCount());
                 }else{
-                    ((RemovableInvGUIItem) gui.items[1]).display.decrement(trade.getAdjustedFirstBuyItem().getCount());
-                    ((RemovableInvGUIItem) gui.items[0]).display.decrement(trade.getSecondBuyItem().getCount());
+                    ((RemovableInvGUIItem) gui.items[1]).display.decrement(trade.getDisplayedFirstBuyItem().getCount());
+                    ((RemovableInvGUIItem) gui.items[0]).display.decrement(trade.getDisplayedSecondBuyItem().getCount());
                 }
 
             }catch(ClassCastException e){
@@ -329,15 +348,8 @@ public class PropertyHelpers {
         }
     }
     public static TradeOfferList createTrades(TradeOffer... trades){
-        var nbt = new NbtCompound();
-
-        var tradesNBT = new NbtList();
-        nbt.put("Recipes", tradesNBT);
-
-        for (TradeOffer trade : trades) {
-            tradesNBT.add(trade.toNbt());
-        }
-
-        return new TradeOfferList(nbt);
+        var toReturn = new TradeOfferList();
+        toReturn.addAll(Arrays.asList(trades));
+        return toReturn;
     }
 }

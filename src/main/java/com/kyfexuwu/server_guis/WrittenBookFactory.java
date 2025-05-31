@@ -4,10 +4,6 @@ import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.WrittenBookContentComponent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtInt;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtString;
 import net.minecraft.server.filter.FilteredMessage;
 import net.minecraft.text.RawFilteredPair;
 import net.minecraft.text.Text;
@@ -20,20 +16,23 @@ public class WrittenBookFactory {
     private final String author;
     private int generation;
     private final ArrayList<Text> pageTexts = new ArrayList<>();
-    public WrittenBookFactory(String title, String author){
-        this.title=title;
-        this.author=author;
+
+    public WrittenBookFactory(String title, String author) {
+        this.title = title;
+        this.author = author;
     }
-    public WrittenBookFactory(String title, String author, Integer generation){
+
+    public WrittenBookFactory(String title, String author, Integer generation) {
         this(title, author);
-        this.generation=generation==null?0:generation;
+        this.generation = generation == null ? 0 : generation;
     }
-    public WrittenBookFactory appendPage(Text page){
+
+    public WrittenBookFactory appendPage(Text page) {
         this.pageTexts.add(page);
         return this;
     }
 
-    public ItemStack build(){
+    public ItemStack build() {
         var toReturn = Items.WRITTEN_BOOK.getDefaultStack();
         toReturn.set(DataComponentTypes.WRITTEN_BOOK_CONTENT, new WrittenBookContentComponent(
                 RawFilteredPair.of(FilteredMessage.permitted(this.title)),
